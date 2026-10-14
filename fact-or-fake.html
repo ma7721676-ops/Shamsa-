@@ -1,0 +1,1541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fact or Fake?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a Google Sites style site with six tabs. Each research tab moves from dark "problem" bands to light "fix" bands; each tab has its own accent (Phishing orange, Shops green, Impersonation magenta). Single deliberate look, every colour set explicitly. */
+:root{
+  --navy:#1E1A4D; --navy-2:#15123A; --blue:#0B4FB3; --blue-soft:#DCE5F3;
+  --orange:#C2410C; --orange-soft:#F59E5B; --teal:#0F766E; --teal-soft:#D5EFEC;
+  --green:#1F7A4A; --green-bright:#86E0A8; --green-soft:#DDF2E4;
+  --magenta:#9D2463; --magenta-bright:#F7A6CC; --magenta-soft:#F8DDEA;
+  --paper:#F4F4F6; --grey:#E7E7E9; --line:#D3D3DA; --ink:#1E1A4D; --muted:#4A4870;
+  --on-dark:#ECEAF6; --on-dark-muted:#B9B5D8; --white:#FFFFFF; --red:#B91C1C;
+  --f-display:'Poppins', 'Segoe UI', Arial, sans-serif;
+  --f-mono:'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-display);font-size:16px;line-height:1.6}
+h1,h2,h3{text-wrap:balance;line-height:1.15;margin:0}
+p{margin:0}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.band{padding-block:72px}
+.band.dark{background:var(--navy);color:var(--on-dark)}
+.band.darker{background:var(--navy-2);color:var(--on-dark)}
+.band.light{background:var(--paper)}
+.band.grey{background:var(--grey)}
+.band.white{background:var(--white)}
+
+/* Per-tab accents */
+.page{--acc:var(--orange);--acc-bright:var(--orange-soft);--acc-soft:#FBE4D7}
+.page[data-page="shops"]{--acc:var(--green);--acc-bright:var(--green-bright);--acc-soft:var(--green-soft)}
+.page[data-page="impersonation"]{--acc:var(--magenta);--acc-bright:var(--magenta-bright);--acc-soft:var(--magenta-soft)}
+.page[data-page="activities"],.page[data-page="references"]{--acc:var(--blue);--acc-bright:#9CC2FF;--acc-soft:var(--blue-soft)}
+
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.dark .eyebrow,.darker .eyebrow,.page-banner .eyebrow{color:var(--acc-bright)}
+.light .eyebrow,.white .eyebrow,.grey .eyebrow{color:var(--acc)}
+.page[data-page="phishing"] .light .eyebrow,.page[data-page="phishing"] .white .eyebrow,.page[data-page="phishing"] .grey .eyebrow{color:var(--teal)}
+.page[data-page="home"] .light .eyebrow,.page[data-page="home"] .white .eyebrow,.page[data-page="home"] .grey .eyebrow{color:var(--blue)}
+.sec-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-top:8px}
+.dark .sec-title,.darker .sec-title{color:var(--white)}
+.sec-lead{max-width:62ch;margin-top:12px;font-size:18px}
+.dark .sec-lead,.darker .sec-lead{color:var(--on-dark-muted)}
+.light .sec-lead,.white .sec-lead,.grey .sec-lead{color:var(--muted)}
+.cite{font-weight:600;white-space:nowrap;opacity:.8}
+.mono{font-family:var(--f-mono)}
+.scope{font-size:13.5px;font-style:italic}
+.dark .scope,.darker .scope{color:var(--on-dark-muted)}
+.light .scope,.white .scope,.grey .scope{color:var(--muted)}
+.source-line{margin-top:24px;font-size:14px;font-style:italic}
+.dark .source-line,.darker .source-line{color:var(--on-dark-muted)}
+.light .source-line,.white .source-line,.grey .source-line{color:var(--muted)}
+
+/* Top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;background:var(--white);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:12px}
+.brand{font-weight:800;font-size:20px;color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--navy);color:var(--orange-soft);display:grid;place-items:center;font-size:18px}
+.nav{display:flex;gap:2px;flex-wrap:wrap;margin-left:auto}
+.nav a{font-weight:600;font-size:14px;color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:999px;display:flex;align-items:center;gap:6px}
+.nav a .no{font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--grey);color:var(--muted)}
+.nav a[aria-current="page"]{background:var(--navy);color:var(--white)}
+.nav a[aria-current="page"] .no{background:var(--orange-soft);color:var(--navy)}
+.nav a:hover{color:var(--navy);background:var(--grey)}
+.nav a[aria-current="page"]:hover{color:var(--white);background:var(--navy)}
+.notes-toggle{font:600 13px var(--f-display);border:1.5px dashed var(--blue);color:var(--blue);background:transparent;border-radius:999px;padding:7px 14px;cursor:pointer}
+.notes-toggle[aria-pressed="true"]{background:var(--blue);color:var(--white);border-style:solid}
+
+/* Google Sites build notes */
+.note{display:none;font:600 12px var(--f-mono);color:var(--blue);background:var(--blue-soft);border:1.5px dashed var(--blue);border-radius:8px;padding:4px 10px;margin-bottom:14px;width:fit-content;max-width:100%}
+body.show-notes .note{display:block}
+.page[hidden]{display:none!important}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;font:700 16px var(--f-display);text-decoration:none;border-radius:999px;padding:14px 26px;border:0;cursor:pointer}
+.btn-orange{background:var(--orange);color:var(--white)}
+.btn-orange:hover{background:#A3360A}
+.btn-light{background:var(--white);color:var(--navy)}
+.btn-ghost{background:transparent;color:var(--white);border:2px solid var(--on-dark-muted)}
+
+/* Shared visuals */
+.stamp{position:absolute;right:12px;top:10px;font:800 13px var(--f-display);letter-spacing:.12em;color:var(--red);border:2.5px solid var(--red);border-radius:6px;padding:1px 8px;transform:rotate(-10deg);background:var(--white)}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--navy);color:var(--white);display:grid;place-items:center;font-weight:800;font-size:20px;flex:none}
+
+/* HOME */
+.hero{background:radial-gradient(circle at 85% 20%, rgba(194,65,12,.35), transparent 45%), radial-gradient(circle at 10% 90%, rgba(11,79,179,.45), transparent 50%), var(--navy);color:var(--on-dark)}
+.hero .wrap{padding-block:88px 96px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:48px;align-items:center}
+.hero h1{font-size:clamp(48px,8vw,96px);font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.hero h1 .q{color:var(--orange-soft)}
+.hero .tag{font-size:clamp(20px,2.4vw,26px);font-weight:700;margin-top:16px;color:var(--white)}
+.hero .sub{font-size:18px;margin-top:10px;color:var(--on-dark-muted);max-width:46ch}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.stack-msgs{display:grid;gap:12px}
+.bubble{background:var(--white);color:var(--ink);border-radius:20px 20px 20px 6px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.25);position:relative}
+.bubble small{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px}
+.bubble b{font-size:15px;display:block;padding-right:70px}
+.bubble:nth-child(2){margin-left:28px;transform:rotate(1.5deg)}
+.bubble:nth-child(3){transform:rotate(-1.5deg)}
+
+.test-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:28px}
+.urlbar{display:flex;align-items:center;gap:12px;background:var(--white);border:2px solid var(--line);border-radius:999px;padding:14px 20px;font-family:var(--f-mono);font-size:17px;font-weight:600;min-width:0}
+.urlbar .lbl{flex:none;width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--white);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.urlbar span.addr{overflow-wrap:anywhere;min-width:0}
+details.reveal{margin-top:20px;background:var(--white);border:2px solid var(--line);border-radius:16px;max-width:760px}
+details.reveal summary{cursor:pointer;list-style:none;padding:16px 20px;font-weight:700;display:flex;align-items:center;gap:10px}
+details.reveal summary::-webkit-details-marker{display:none}
+details.reveal summary::before{content:"▸";color:var(--orange);transition:transform .2s}
+details.reveal[open] summary::before{transform:rotate(90deg)}
+details.reveal .ans{padding:0 20px 18px;color:var(--muted)}
+details.reveal .ans b{color:var(--teal)}
+
+.bigstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:36px}
+.bigstat{display:grid;gap:10px;align-content:start;padding-top:18px;border-top:4px solid var(--orange-soft)}
+.bigstat:nth-child(2){border-top-color:var(--green-bright)} .bigstat:nth-child(3){border-top-color:var(--magenta-bright)}
+.bigstat .num{font-size:clamp(44px,6vw,72px);font-weight:800;line-height:1;color:var(--white);font-variant-numeric:tabular-nums}
+.bigstat .topic{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-soft)}
+.bigstat:nth-child(2) .topic{color:var(--green-bright)} .bigstat:nth-child(3) .topic{color:var(--magenta-bright)}
+.bigstat p{font-size:16.5px;color:var(--on-dark)}
+
+.about-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:32px}
+.about{background:var(--white);border-radius:20px;padding:26px;display:grid;gap:10px;align-content:start;border-left:6px solid var(--blue)}
+.about:nth-child(2){border-left-color:var(--teal)} .about:nth-child(3){border-left-color:var(--orange)} .about:nth-child(4){border-left-color:var(--navy)}
+.about h3{font-size:22px;font-weight:800;font-style:italic}
+.about p{color:var(--muted)}
+
+.split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:48px;align-items:center}
+.split h2{font-size:clamp(28px,4vw,40px);font-weight:800}
+.split p{margin-top:14px;font-size:18px;color:var(--muted);max-width:52ch}
+.shield-art{aspect-ratio:1/1;max-width:300px;width:100%;justify-self:center;background:var(--blue-soft);border-radius:50%;display:grid;place-items:center}
+
+.rq-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:32px}
+.rq{background:var(--white);border-radius:20px;padding:24px;display:grid;gap:12px;align-content:start;border-top:8px solid var(--blue)}
+.rq.g{border-top-color:var(--green)} .rq.m{border-top-color:var(--magenta)}
+.rq .who{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+.rq.g .who{color:var(--green)} .rq.m .who{color:var(--magenta)}
+.rq h3{font-size:20px;font-weight:800}
+.rq .q{display:grid;gap:4px;padding-top:12px;border-top:1.5px solid var(--line)}
+.rq .q span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rq .q p{font-size:15px}
+.pei{margin-top:22px;color:var(--muted);font-style:italic;max-width:70ch}
+
+.missions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;margin-top:32px}
+.mission{grid-column:span 2;display:grid;gap:8px;text-decoration:none;color:var(--on-dark);background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;min-height:190px;align-content:end;transition:transform .2s, background .2s}
+.mission:nth-child(4),.mission:nth-child(5){grid-column:span 3;min-height:150px}
+.mission:hover{transform:translateY(-4px);background:rgba(255,255,255,.1)}
+.mission .ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;margin-bottom:auto}
+.mission h3{font-size:21px;font-weight:800;color:var(--white)}
+.mission p{color:var(--on-dark-muted);font-size:15px}
+.mission .who{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-soft)}
+
+.cta-band{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:var(--blue);color:var(--white);border-radius:24px;padding:32px 36px}
+.cta-band h2{font-size:clamp(24px,3vw,32px);font-weight:800}
+.cta-band p{color:var(--blue-soft);margin-top:4px}
+
+/* Tab banners */
+.page-banner{background:linear-gradient(180deg,var(--navy-2),var(--navy));color:var(--white)}
+.page-banner .wrap{padding-block:64px 40px}
+.banner-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:center}
+.page-banner h1{font-size:clamp(34px,5.6vw,60px);font-weight:800;letter-spacing:-.01em;margin-top:12px}
+.page-banner h1 em{font-style:normal;color:var(--acc-bright)}
+.page-banner .sub{margin-top:14px;font-size:19px;font-style:italic;color:var(--on-dark-muted);max-width:44ch}
+.jumpbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.jumpbar a{text-decoration:none;font-weight:700;font-size:15px;padding:10px 20px;border-radius:999px;border:2px solid rgba(255,255,255,.2);color:var(--white)}
+.jumpbar a .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.alert-strip{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:var(--acc-bright)}
+.alert-strip .pulse{width:12px;height:12px;border-radius:50%;background:var(--acc);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%{box-shadow:0 0 0 14px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+
+/* Phishing anatomy */
+.anatomy{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center;margin-top:36px}
+.phone{background:var(--paper);color:var(--ink);border:3px solid var(--on-dark-muted);border-radius:40px;padding:22px;max-width:380px;width:100%;justify-self:center;display:grid;gap:16px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.phone-head{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1.5px solid var(--line)}
+.phone-head b{display:block;font-size:17px}
+.phone-head small{color:var(--muted);font-size:13px}
+.msg{background:var(--grey);border-radius:20px 20px 20px 6px;padding:16px;font-size:15.5px;line-height:1.5}
+.msg .lnk{display:block;margin-top:10px;color:var(--blue);text-decoration:underline;font-family:var(--f-mono);font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.mark{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--orange);color:var(--white);font:700 12px var(--f-display);vertical-align:2px;margin-left:4px;font-style:normal}
+.hl{background:#FFE3D0;border-radius:4px;padding:0 3px}
+.phone .stamp{position:static;justify-self:center;font-size:30px;padding:2px 18px;border-width:4px;transform:rotate(-7deg)}
+.made-up{font-size:13px;font-style:italic;color:var(--on-dark-muted);text-align:center;margin-top:12px}
+.steps{display:grid;gap:22px}
+.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;align-items:start}
+.step .n{width:44px;height:44px;border-radius:50%;background:var(--orange);color:var(--white);display:grid;place-items:center;font-weight:800;font-size:18px}
+.step h3{font-size:21px;font-weight:700;color:var(--white)}
+.step p{color:var(--on-dark-muted);margin-top:4px}
+
+.ladder{display:grid;gap:18px;margin-top:36px;max-width:900px}
+.rung{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:center}
+.rung .when{font-weight:700;font-size:17px;color:var(--white)}
+.bar-track{background:rgba(255,255,255,.08);border-radius:12px;height:58px;overflow:hidden}
+.bar{height:100%;border-radius:12px;display:flex;align-items:center;justify-content:flex-end;padding-right:16px;font-weight:800;font-size:26px;color:var(--white);font-variant-numeric:tabular-nums;min-width:96px}
+.bar.b1{background:#7F3A1F} .bar.b2{background:#A63B13} .bar.b3{background:var(--orange)}
+.ninth{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:40px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:20px;padding:24px 28px}
+.people{display:flex;gap:6px;flex-wrap:wrap}
+.person{width:26px;height:34px}
+.ninth p{font-size:19px;font-weight:600;color:var(--white);flex:1;min-width:240px}
+.ninth p b{color:var(--orange-soft)}
+
+.channels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:28px}
+.channel{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:18px;padding:22px;display:grid;gap:8px;align-content:start}
+.channel svg{width:32px;height:32px}
+.channel h3{font-size:19px;font-weight:700;color:var(--white)}
+.channel p{color:var(--on-dark-muted);font-size:15px}
+
+.cost-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;margin-top:36px}
+.cost{grid-column:span 2;background:var(--navy);border:1.5px solid rgba(255,255,255,.16);border-radius:20px;padding:26px;display:grid;gap:10px;align-content:start}
+.cost.wide{grid-column:span 3}
+.cost .ic{width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.08);display:grid;place-items:center}
+.cost h3{font-size:22px;font-weight:800;color:var(--acc-bright)}
+.cost p{color:var(--on-dark)}
+.feel{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.feel span{font-size:14px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--white)}
+.feel span b{color:var(--orange-soft)}
+
+.ripple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:56px}
+.ripple svg{width:100%;max-width:420px;justify-self:center;height:auto}
+.ripple h3{font-size:clamp(26px,3.4vw,36px);font-weight:800;color:var(--white)}
+.ripple p{margin-top:12px;color:var(--on-dark-muted);font-size:17px;max-width:46ch}
+
+.callout{margin-top:56px;background:var(--acc);color:var(--white);border-radius:24px;padding:32px 36px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center}
+.callout .big{font-size:clamp(52px,8vw,84px);font-weight:800;line-height:1}
+.callout h3{font-size:22px;font-weight:800}
+.callout p{margin-top:8px;color:rgba(255,255,255,.92)}
+.callout .quotes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.callout .quotes span{background:rgba(0,0,0,.18);border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px;font-style:italic}
+
+.turn{color:var(--white);text-align:center;background:linear-gradient(180deg,var(--navy-2) 0%, var(--navy) 30%, var(--teal) 100%)}
+.page[data-page="shops"] .turn{background:linear-gradient(180deg,var(--navy-2) 0%, var(--navy) 30%, var(--green) 100%)}
+.page[data-page="impersonation"] .turn{background:linear-gradient(180deg,var(--navy-2) 0%, var(--navy) 30%, var(--magenta) 100%)}
+.turn .wrap{padding-block:88px}
+.turn h2{font-size:clamp(38px,6.6vw,72px);font-weight:800}
+.turn p{font-size:clamp(18px,2.4vw,24px);margin-top:12px;font-weight:600;color:rgba(255,255,255,.9)}
+.turn .switch{display:inline-flex;align-items:center;gap:14px;margin-bottom:24px;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.turn .switch i{width:58px;height:30px;border-radius:999px;background:var(--white);position:relative;display:inline-block}
+.turn .switch i::after{content:"";position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--teal)}
+.page[data-page="shops"] .turn .switch i::after{background:var(--green)}
+.page[data-page="impersonation"] .turn .switch i::after{background:var(--magenta)}
+
+.moves{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:36px}
+.move{background:var(--white);border-radius:20px;padding:26px;display:grid;gap:10px;align-content:start;border-top:8px solid var(--teal);box-shadow:0 8px 24px rgba(30,26,77,.07)}
+.move:nth-child(2){border-top-color:#0E7490} .move:nth-child(3){border-top-color:var(--blue)} .move:nth-child(4){border-top-color:var(--navy)}
+.move .n{font-size:44px;font-weight:800;line-height:1;color:var(--teal)}
+.move:nth-child(2) .n{color:#0E7490} .move:nth-child(3) .n{color:var(--blue)} .move:nth-child(4) .n{color:var(--navy)}
+.move h3{font-size:22px;font-weight:800;font-style:italic}
+.move p{color:var(--muted);font-size:15.5px}
+
+.flags{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:32px}
+.flag{background:var(--white);border:2px solid var(--line);border-radius:16px}
+.flag summary{cursor:pointer;list-style:none;padding:18px 20px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px}
+.flag summary::-webkit-details-marker{display:none}
+.flag summary .f{flex:none;width:34px;height:34px;border-radius:10px;background:#FBE4D7;display:grid;place-items:center}
+.flag summary .t{min-width:0;overflow-wrap:anywhere}
+.flag summary .chev{margin-left:auto;color:var(--orange);transition:transform .2s;flex:none}
+.flag[open] summary .chev{transform:rotate(90deg)}
+.flag[open]{border-color:var(--orange)}
+.flag .ans{padding:0 20px 18px;color:var(--muted)}
+
+.xray{margin-top:44px;background:var(--navy);color:var(--on-dark);border-radius:24px;padding:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:32px;align-items:center}
+.xray h3{font-size:26px;font-weight:800;color:var(--white)}
+.xray p{color:var(--on-dark-muted);margin-top:8px}
+.xray-demo{display:grid;gap:12px}
+.xbtn{font:700 17px var(--f-display);background:var(--white);color:var(--navy);border:0;border-radius:14px;padding:16px 20px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.xbtn span:last-child{font-size:13px;color:var(--muted);font-weight:600}
+.xray-out{min-height:84px;border-radius:14px;border:2px dashed rgba(255,255,255,.25);padding:14px 18px;display:grid;gap:4px;align-content:center}
+.xray-out .lab{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--on-dark-muted)}
+.xray-out .addr{font-family:var(--f-mono);font-weight:600;font-size:17px;overflow-wrap:anywhere;color:var(--white)}
+.xray-out .verdict{font-weight:700;font-size:15px}
+.ok{color:#5EEAD4} .bad{color:var(--orange-soft)}
+
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:32px}
+.duo .card{background:var(--white);border-radius:20px;padding:26px;display:grid;gap:8px;align-content:start}
+.duo h3{font-size:21px;font-weight:800}
+.duo p{color:var(--muted)}
+.help{margin-top:18px;background:var(--teal);color:var(--white);border-radius:24px;padding:30px 34px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.page:not([data-page="phishing"]) .help{background:var(--acc)}
+.help h3{font-size:24px;font-weight:800}
+.help p{margin-top:6px;color:rgba(255,255,255,.92)}
+
+.gap-bars{display:grid;gap:18px;margin-top:32px;max-width:860px}
+.gbar{display:grid;gap:8px}
+.gbar .row{display:flex;justify-content:space-between;gap:12px;font-weight:600;color:var(--muted)}
+.gbar .row b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.gtrack{height:26px;background:var(--grey);border-radius:999px;overflow:hidden}
+.gfill{height:100%;border-radius:999px}
+.gap-quote{margin-top:30px;font-size:clamp(22px,3vw,30px);font-weight:800;max-width:30ch}
+.gap-quote span{color:var(--teal)}
+
+.bottom-line{background:var(--navy);color:var(--white);text-align:center}
+.bottom-line .wrap{padding-block:64px}
+.bottom-line p{font-size:clamp(22px,3.2vw,34px);font-weight:700;max-width:34ch;margin:0 auto;line-height:1.35}
+.bottom-line p b{color:var(--acc-bright)}
+
+/* Generic fact cards (Shops, Impersonation) */
+.fact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:32px}
+.fact{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:20px;padding:26px;display:grid;gap:10px;align-content:start}
+.fact .ic{width:48px;height:48px;border-radius:12px;background:var(--acc);display:grid;place-items:center}
+.fact h3{font-size:22px;font-weight:800;color:var(--acc-bright)}
+.fact p{color:var(--on-dark)}
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:32px}
+.stat-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fact-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat .num.word{font-size:clamp(28px,3.4vw,36px)}
+.fig{margin:0;display:grid;gap:12px;justify-items:center}
+.fig-cap{font-size:13.5px;font-style:italic;color:var(--on-dark-muted);text-align:center;max-width:380px}
+.fig-cap b{font-style:normal;color:var(--white)}
+.quote-box{border-left:6px solid var(--acc);padding:6px 0 6px 28px;display:grid;gap:12px}
+.split .quote-box .q-big{margin:0;max-width:none;font-size:clamp(24px,3vw,32px);font-weight:800;font-style:italic;line-height:1.3;color:var(--acc)}
+.split .quote-box .q-src{margin:0;font-size:15px;font-weight:600;color:var(--muted)}
+.split p + p{margin-top:12px}
+.why{margin-top:36px;background:rgba(255,255,255,.06);border-left:6px solid var(--acc-bright);border-radius:0 18px 18px 0;padding:22px 26px;display:grid;gap:8px}
+.why h3{font-size:22px;font-weight:800;color:var(--white)}
+.why p{color:var(--on-dark);max-width:75ch}
+.cost-grid.four .cost{grid-column:span 3}
+.channels.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.stat{background:rgba(255,255,255,.05);border-radius:20px;padding:24px;display:grid;gap:10px;align-content:start;border-top:6px solid var(--acc-bright)}
+.stat .num{font-size:clamp(40px,5vw,56px);font-weight:800;line-height:1;color:var(--acc-bright);font-variant-numeric:tabular-nums}
+.stat p{color:var(--on-dark)}
+.tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:32px}
+.tips.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tip{background:var(--white);border-radius:20px;padding:26px;display:grid;gap:10px;align-content:start;border-top:8px solid var(--acc);box-shadow:0 8px 24px rgba(30,26,77,.07)}
+.tip .n{font-size:40px;font-weight:800;line-height:1;color:var(--acc)}
+.tip h3{font-size:21px;font-weight:800;font-style:italic}
+.tip p{color:var(--muted);font-size:15.5px}
+
+/* Shops visuals */
+.ad{background:var(--white);color:var(--ink);border-radius:24px;padding:18px;display:grid;gap:12px;max-width:380px;width:100%;justify-self:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.ad-head{display:flex;align-items:center;gap:10px}
+.ad-head b{display:block;line-height:1.2}
+.ad-head small{color:var(--muted);font-weight:600}
+.deal{background:linear-gradient(135deg,var(--green),#134E3A);color:var(--white);border-radius:16px;text-align:center;padding:22px 16px}
+.deal b{display:block;font-size:52px;line-height:1;color:#FDE68A}
+.ad .shop{font:700 16px var(--f-display);background:var(--navy);color:var(--white);border-radius:12px;padding:12px;text-align:center}
+.ad .stamp{top:14px;right:14px}
+.giveaway{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:center;margin-top:56px}
+.dm{background:var(--paper);color:var(--ink);border-radius:22px;padding:20px;display:grid;gap:12px;max-width:400px;width:100%;justify-self:center}
+.dm .bub{background:var(--white);border-radius:18px 18px 18px 6px;padding:14px 16px;font-size:15.5px}
+.dm .bub .lnk{display:block;margin-top:8px;color:var(--blue);text-decoration:underline;font-family:var(--f-mono);font-weight:600;font-size:13.5px;overflow-wrap:anywhere}
+.giveaway h3{font-size:clamp(26px,3.4vw,36px);font-weight:800;color:var(--white)}
+.giveaway p{margin-top:12px;color:var(--on-dark-muted);font-size:17px;max-width:46ch}
+
+.detector{margin-top:44px;background:var(--navy);color:var(--on-dark);border-radius:24px;padding:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;align-items:start}
+.detector h3{font-size:26px;font-weight:800;color:var(--white)}
+.detector .lead{color:var(--on-dark-muted);margin-top:8px}
+.checks-list{display:grid;gap:10px}
+.chk{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--green);flex:none;margin-top:2px}
+.chk span{font-size:15.5px}
+.meter{margin-top:20px;display:grid;gap:8px}
+.meter-track{height:16px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden}
+.meter-fill{height:100%;width:0;border-radius:999px;background:var(--green-bright);transition:width .3s, background .3s}
+.verdict-text{font-weight:700;font-size:18px;color:var(--white)}
+
+/* Impersonation visuals */
+.call{background:linear-gradient(180deg,#2A2160,var(--navy-2));border:3px solid var(--on-dark-muted);border-radius:40px;padding:30px 22px;max-width:340px;width:100%;justify-self:center;display:grid;justify-items:center;gap:12px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.call .av{width:92px;height:92px;border-radius:50%;background:var(--magenta-bright);color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:40px;box-shadow:0 0 0 10px rgba(247,166,204,.15),0 0 0 22px rgba(247,166,204,.07)}
+.call b{font-size:24px;color:var(--white)}
+.call small{color:var(--magenta-bright);font-weight:600}
+.call q{display:block;background:var(--on-dark);color:var(--ink);border-radius:16px;padding:12px 16px;font-style:italic;font-weight:600;font-size:15px}
+.call .btns{display:flex;gap:40px;margin-top:6px}
+.call .btns span{width:56px;height:56px;border-radius:50%;display:grid;place-items:center}
+.wave{display:flex;gap:4px;align-items:center;height:30px}
+.wave i{width:5px;border-radius:3px;background:var(--magenta-bright);animation:wv 1.1s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.4s}.wave i:nth-child(6){animation-delay:.5s}.wave i:nth-child(7){animation-delay:.6s}
+@keyframes wv{0%,100%{height:8px}50%{height:28px}}
+.flow{display:grid;gap:0;max-width:640px;margin-top:32px}
+.fstep{display:grid;grid-template-columns:56px minmax(0,1fr);gap:16px;align-items:start;position:relative;padding-bottom:22px}
+.fstep:not(:last-child)::before{content:"";position:absolute;left:27px;top:56px;bottom:0;width:3px;background:var(--acc-soft)}
+.fstep .dot{width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--white);display:grid;place-items:center;font-weight:800;font-size:20px}
+.fstep.q .dot{background:var(--navy)}
+.fstep h3{font-size:20px;font-weight:800;padding-top:4px}
+.fstep p{color:var(--muted);margin-top:4px}
+
+/* ACTIVITIES */
+.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:32px}
+.feature{display:grid;gap:14px;text-decoration:none;border-radius:26px;padding:30px;color:var(--white);background:var(--navy);align-content:start;transition:transform .2s}
+.feature:hover{transform:translateY(-4px)}
+.feature.wordwall{background:var(--blue)}
+.feature .kind{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange-soft)}
+.feature.wordwall .kind{color:#FDE68A}
+.feature h3{font-size:clamp(24px,3vw,30px);font-weight:800}
+.feature p{color:rgba(255,255,255,.85)}
+.feature .screen{aspect-ratio:16/9;max-width:100%;border-radius:18px;background:rgba(255,255,255,.08);display:grid;place-items:center}
+.feature .screen span{width:76px;height:76px;border-radius:50%;background:var(--white);display:grid;place-items:center}
+.feature .u{font-family:var(--f-mono);font-size:13px;color:rgba(255,255,255,.75);overflow-wrap:anywhere}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tiles i{aspect-ratio:1/1;border-radius:14px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:22px;color:#FDE68A}
+
+.rounds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:32px}
+.round{background:var(--white);border-radius:22px;padding:22px;display:grid;gap:16px;align-content:start;border-top:8px solid var(--orange);box-shadow:0 8px 24px rgba(30,26,77,.08)}
+.round:nth-child(2){border-top-color:var(--green)} .round:nth-child(3){border-top-color:var(--magenta)}
+.round .rl{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}
+.round:nth-child(2) .rl{color:var(--green)} .round:nth-child(3) .rl{color:var(--magenta)}
+.scene{border-radius:16px;padding:16px;display:grid;gap:10px}
+.scene.dk{background:var(--navy);color:var(--on-dark)}
+.scene.post{background:var(--paper);border:1.5px solid var(--line)}
+.scene .chip{display:flex;align-items:center;gap:10px;background:var(--white);color:var(--ink);border-radius:999px;padding:10px 14px;font-family:var(--f-mono);font-weight:600;font-size:14px;overflow-wrap:anywhere;min-width:0}
+.scene .chip i{font-style:normal;flex:none;width:26px;height:26px;border-radius:50%;background:var(--orange);color:var(--white);display:grid;place-items:center;font:700 13px var(--f-display)}
+.scene .deal b{font-size:40px}
+.caller{display:grid;justify-items:center;gap:6px;text-align:center}
+.caller .av{width:60px;height:60px;border-radius:50%;background:var(--magenta-bright);color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:26px}
+.caller q{display:block;background:var(--on-dark);color:var(--ink);border-radius:14px;padding:10px 14px;font-style:italic;font-weight:600;font-size:15px}
+.round h3{font-size:19px;font-weight:700;font-style:italic}
+.choices{display:grid;gap:10px}
+.choice{font:600 15.5px var(--f-display);text-align:left;background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer}
+.choice:hover{border-color:var(--navy)}
+.choice.right{background:var(--teal-soft);border-color:var(--teal)}
+.choice.wrong{background:#FBE4D7;border-color:var(--orange)}
+.choice:disabled{cursor:default}
+.feedback{font-size:14.5px;color:var(--muted)}
+.feedback b{color:var(--ink)}
+.score{margin-top:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--navy);color:var(--white);border-radius:20px;padding:22px 28px}
+.score .s{font-size:44px;font-weight:800;color:var(--orange-soft);font-variant-numeric:tabular-nums}
+.score .badge{font-size:20px;font-weight:700}
+.score .reset{margin-left:auto;font:700 14px var(--f-display);background:transparent;border:2px solid var(--on-dark-muted);color:var(--white);border-radius:999px;padding:9px 18px;cursor:pointer}
+
+.trap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.trap h2{font-size:clamp(28px,4vw,40px);font-weight:800}
+.trap .lead{margin-top:12px;color:var(--muted);font-size:17px;max-width:46ch}
+.login{background:var(--white);border:2px solid var(--line);border-radius:22px;overflow:hidden;max-width:440px;width:100%;justify-self:center;box-shadow:0 18px 40px rgba(30,26,77,.12)}
+.login .lbar{display:flex;align-items:center;gap:10px;background:var(--grey);padding:10px 14px;border-bottom:2px solid var(--line);font-size:13px;min-width:0}
+.login .lbar .addr{font-family:var(--f-mono);font-weight:600;background:var(--white);border-radius:999px;padding:6px 12px;overflow-wrap:anywhere;min-width:0}
+.login .body{padding:28px;display:grid;gap:14px}
+.login .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
+.login .logo .avatar{width:38px;height:38px;font-size:17px}
+.login label{font-weight:600;font-size:14px;display:grid;gap:6px}
+.login input{font:500 16px var(--f-display);padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;color:var(--ink);background:var(--white)}
+.login .go{font:700 16px var(--f-display);background:var(--navy);color:var(--white);border:0;border-radius:10px;padding:14px;cursor:pointer}
+.gotcha{padding:28px;display:grid;gap:12px;background:var(--navy);color:var(--on-dark)}
+.gotcha h3{font-size:30px;font-weight:800;color:var(--orange-soft)}
+.gotcha ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.gotcha .again{justify-self:start;font:700 14px var(--f-display);background:var(--white);color:var(--navy);border:0;border-radius:999px;padding:10px 18px;cursor:pointer}
+
+/* REFERENCES */
+.map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:32px}
+.map .card{background:var(--white);border-radius:20px;padding:24px;display:grid;gap:12px;align-content:start;border-top:8px solid var(--orange)}
+.map .card:nth-child(2){border-top-color:var(--green)} .map .card:nth-child(3){border-top-color:var(--magenta)}
+.map h3{font-size:19px;font-weight:800}
+.map .chips{display:flex;gap:8px;flex-wrap:wrap}
+.map .chips a{font-weight:700;font-size:14px;text-decoration:none;padding:6px 12px;border-radius:999px;background:var(--grey);color:var(--ink)}
+.map p{color:var(--muted);font-size:15px}
+.ieee{margin-top:40px;background:var(--white);border-radius:22px;padding:30px;max-width:980px}
+.ieee ol{padding:0;margin:16px 0 0;display:grid;gap:16px;list-style:none}
+.ieee li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px;font-family:'Times New Roman', Georgia, serif;font-size:17px;line-height:1.5;scroll-margin-top:90px}
+.ieee li:target{background:var(--blue-soft);border-radius:8px}
+.ieee .k{font-weight:700;color:var(--ink)}
+.ref-group{margin-top:26px;font-family:'Times New Roman', Georgia, serif;font-size:24px;font-weight:700;font-style:italic;color:#17506B}
+.ieee a{overflow-wrap:anywhere}
+.checks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+.checks .card{background:var(--white);border-radius:18px;padding:22px;display:grid;gap:8px}
+.checks h3{font-size:18px;font-weight:700}
+.checks p{color:var(--muted);font-size:15px}
+.figs{margin-top:20px;display:grid;gap:8px;color:var(--muted);font-size:15px;max-width:900px}
+
+.footer{background:var(--navy-2);color:var(--on-dark-muted);font-size:14px}
+.footer .wrap{padding-block:28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* Responsive */
+@media (max-width: 960px){
+  .moves,.channels,.stat-grid,.tips.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .channels.three{grid-template-columns:minmax(0,1fr)}
+  .rounds,.cost-grid,.rq-grid,.map,.fact-grid.three{grid-template-columns:minmax(0,1fr)}
+  .cost,.cost.wide{grid-column:auto}
+  .flags,.tips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .missions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mission,.mission:nth-child(4),.mission:nth-child(5){grid-column:auto}
+}
+@media (max-width: 760px){
+  .hero .wrap,.split,.anatomy,.ripple,.xray,.trap,.duo,.checks,.test-grid,.banner-grid,.giveaway,.detector,.feature-grid,.fact-grid,.about-grid{grid-template-columns:minmax(0,1fr)}
+  .bigstats,.stat-grid.three,.stat-grid.two{grid-template-columns:minmax(0,1fr)}
+  .rung{grid-template-columns:minmax(0,1fr);gap:6px}
+  .callout,.help{grid-template-columns:minmax(0,1fr)}
+  .band{padding-block:56px}
+  .nav{margin-left:0;width:100%}
+}
+@media (max-width: 520px){
+  .moves,.channels,.flags,.stat-grid,.tips,.tips.four,.missions{grid-template-columns:minmax(0,1fr)}
+  .xray,.callout,.help,.cta-band,.detector,.ieee{padding:22px}
+}
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#home"><span class="brand-mark" aria-hidden="true">?</span>Fact or Fake</a>
+    <nav class="nav" aria-label="Site tabs">
+      <a href="#home" data-link="home"><span class="no">1</span>Home</a>
+      <a href="#phishing" data-link="phishing"><span class="no">2</span>Phishing</a>
+      <a href="#shops" data-link="shops"><span class="no">3</span>Fake Online Shops</a>
+      <a href="#impersonation" data-link="impersonation"><span class="no">4</span>Impersonation and AI</a>
+      <a href="#activities" data-link="activities"><span class="no">5</span>Activities</a>
+      <a href="#references" data-link="references"><span class="no">6</span>References</a>
+    </nav>
+    <button class="notes-toggle" id="notesToggle" type="button" aria-pressed="false">Show Google Sites notes</button>
+  </div>
+</header>
+
+<!-- ================= TAB 1: HOME ================= -->
+<main class="page" data-page="home">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="note">Sites: Header type "Cover" · dark background image · Button blocks</div>
+        <h1>Fact or Fake<span class="q">?</span></h1>
+        <p class="tag">Not everything that looks real is real.</p>
+        <p class="sub">Fake links, fake shops and fake voices are built to fool you. This site teaches you to see through them.</p>
+        <div class="actions">
+          <a class="btn btn-orange" href="#test">Can you spot a fake? ↓</a>
+          <a class="btn btn-ghost" href="#explore">Explore the tabs</a>
+        </div>
+      </div>
+      <div class="stack-msgs" aria-label="Examples of scam messages">
+        <div class="bubble"><small>Text message · 9:41</small><b>You've won! Claim your prize now.</b><span class="stamp">FAKE</span></div>
+        <div class="bubble"><small>Sponsored post · 10:02</small><b>Designer sneakers, 90% off today only!</b><span class="stamp">FAKE</span></div>
+        <div class="bubble"><small>Incoming call · 11:15</small><b>"It's me! I'm in trouble, send money now."</b><span class="stamp">FAKE</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white" id="test">
+    <div class="wrap">
+      <div class="note">Sites: 2 images side by side + Collapsible text group for the answer</div>
+      <p class="eyebrow">The 3-second test</p>
+      <h2 class="sec-title">Quick: which one is real?</h2>
+      <div class="test-grid">
+        <div class="urlbar"><span class="lbl">A</span><span class="addr">pixora.com/login</span></div>
+        <div class="urlbar"><span class="lbl">B</span><span class="addr">pixora-verify.net/login</span></div>
+      </div>
+      <details class="reveal">
+        <summary>Reveal the answer</summary>
+        <p class="ans"><b>A is real.</b> B borrows the brand name but lives on a completely different address, which is exactly how fake login pages trick people <span class="cite">[1]</span>. Pixora is a made-up brand.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="band dark">
+    <div class="wrap">
+      <div class="note">Sites: Section background = dark · 3-column layout · large text boxes</div>
+      <p class="eyebrow" style="color:var(--orange-soft)">Why this matters</p>
+      <h2 class="sec-title">Three numbers from our research</h2>
+      <div class="bigstats">
+        <div class="bigstat"><span class="topic">Phishing</span><div class="num">1 in 5</div><p>UK 8–17 year-olds see online scams every single day <span class="cite">[3]</span>. For many young people, scams are part of normal life online.</p><span class="scope" style="color:var(--on-dark-muted)">UK Safer Internet Centre survey, 2025. All online scams.</span></div>
+        <div class="bigstat"><span class="topic">Fake online shops</span><div class="num">44%</div><p>of social media fraud-loss reports in the first half of 2023 were about online shopping <span class="cite">[7]</span>. Buying something you saw on social media was the most reported scam.</p><span class="scope" style="color:var(--on-dark-muted)">Reports to the US Federal Trade Commission.</span></div>
+        <div class="bigstat"><span class="topic">Impersonation</span><div class="num">$3.5 billion</div><p>was reported lost to impersonation scams in 2025 <span class="cite">[12]</span>. This covers all impersonation scams, not only AI-related ones.</p><span class="scope" style="color:var(--on-dark-muted)">Reports to the US Federal Trade Commission.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grey">
+    <div class="wrap">
+      <div class="note">Sites: 2 × 2 text boxes</div>
+      <p class="eyebrow">About Fact or Fake</p>
+      <h2 class="sec-title">What is Fact or Fake?</h2>
+      <div class="about-grid">
+        <article class="about"><h3>What is it?</h3><p>Fact or Fake is a research-based educational website that helps teenagers recognise deceptive links, fake websites and online impersonation scams. Visitors learn how these scams work, explore practical ways to check suspicious requests, and practise with a video and a 10-question quiz.</p></article>
+        <article class="about"><h3>Who is it for?</h3><p>Our website is designed for teenagers who use social media, shop online, and receive messages through apps, texts or email. We use clear explanations and relatable examples so the research connects to situations you may actually face.</p></article>
+        <article class="about"><h3>What problem does it address?</h3><p>Online content can look trustworthy without being genuine. A familiar logo, an attractive offer, or a message that seems to come from a friend may push someone to click, pay or share personal information.</p></article>
+        <article class="about"><h3>Why does Fact or Fake matter?</h3><p>We go beyond telling teenagers to "be careful online." Each explanation shows why something may be suspicious and how to investigate it, so visitors build habits like questioning unexpected requests and checking sources independently.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap split">
+      <div>
+        <div class="note">Sites: 2-column layout · text left, image right</div>
+        <p class="eyebrow">Why use Fact or Fake alongside security tools?</p>
+        <h2>Your device has security. Does your brain?</h2>
+        <p>A firewall provides technical protection by controlling network traffic. Fact or Fake adds the human side, teaching visitors how to assess a suspicious message, offer or account before deciding what to do.</p>
+      </div>
+      <div class="shield-art" aria-hidden="true">
+        <svg width="62%" viewBox="0 0 120 140" fill="none"><path d="M60 6 110 24v44c0 32-22 56-50 66C32 124 10 100 10 68V24L60 6Z" fill="#0B4FB3"/><path d="M60 22 96 35v33c0 23-15 41-36 49-21-8-36-26-36-49V35l36-13Z" fill="#1E1A4D"/><circle cx="60" cy="62" r="13" stroke="#F59E5B" stroke-width="6"/><path d="M60 75v16" stroke="#F59E5B" stroke-width="6" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="note">Sites: 3-column layout · one text box per team member</div>
+      <p class="eyebrow">The research behind each tab</p>
+      <h2 class="sec-title">Three scams, six research questions</h2>
+      <div class="rq-grid">
+        <article class="rq"><span class="who">Shamsa · Tab 2</span><h3>Phishing links and fake login websites</h3>
+          <div class="q"><span>Understanding the problem</span><p>How do phishing messages and fake login pages trick teenagers into sharing passwords or personal information, and what consequences can follow?</p></div>
+          <div class="q"><span>Learn how to respond</span><p>How can teenagers check a message, link, and website before entering information, and what should they do if they have already shared their details?</p></div></article>
+        <article class="rq g"><span class="who">Fatima · Tab 3</span><h3>Fake online shops and deceptive social media offers</h3>
+          <div class="q"><span>Understanding the problem</span><p>How do fake shops, giveaway posts, and misleading social media advertisements persuade teenagers to trust offers that could steal their money or information?</p></div>
+          <div class="q"><span>Learn how to respond</span><p>How can teenagers verify a seller, offer, and supporting reviews before buying something or claiming a prize?</p></div></article>
+        <article class="rq m"><span class="who">Shamma · Tab 4</span><h3>Impersonation, including AI-generated voices and videos</h3>
+          <div class="q"><span>Understanding the problem</span><p>How do scammers impersonate friends, relatives, or familiar figures, and how can AI-generated voices and videos make their requests more convincing?</p></div>
+          <div class="q"><span>Learn how to respond</span><p>How can teenagers independently verify an unexpected request for money or personal information, even when the voice, video, or account seems familiar?</p></div></article>
+      </div>
+      <p class="pei">Each of us researched two questions about our chosen scam: how it works and how teenagers can protect themselves. The answers use reliable sources, examples and data, following Point → Evidence → Interpretation with IEEE citations.</p>
+    </div>
+  </section>
+
+  <section class="band darker" id="explore">
+    <div class="wrap">
+      <div class="note">Sites: Images with links (Insert → Image → add link) · section background = dark</div>
+      <p class="eyebrow" style="color:var(--orange-soft)">What can visitors explore?</p>
+      <h2 class="sec-title">Choose where to start</h2>
+      <p class="sec-lead">Each research tab explains both the problems and the practical solutions. Then watch the video, test yourself, and explore the sources behind every fact.</p>
+      <div class="missions">
+        <a class="mission" href="#phishing">
+          <span class="ic" style="background:var(--orange)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 3v10a4 4 0 1 1-4-4"/><circle cx="12" cy="3" r="1.5" fill="#fff"/></svg></span>
+          <span class="who">Tab 2</span><h3>Phishing</h3><p>When "log in here" is a trap</p>
+        </a>
+        <a class="mission" href="#shops">
+          <span class="ic" style="background:var(--green)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 12h-11L5 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>
+          <span class="who" style="color:var(--green-bright)">Tab 3</span><h3>Fake Online Shops</h3><p>When the deal is the trap</p>
+        </a>
+        <a class="mission" href="#impersonation">
+          <span class="ic" style="background:var(--magenta)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+          <span class="who" style="color:var(--magenta-bright)">Tab 4</span><h3>Impersonation and AI</h3><p>When the voice isn't really theirs</p>
+        </a>
+        <a class="mission" href="#activities">
+          <span class="ic" style="background:var(--blue)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7L8 5Z"/></svg></span>
+          <span class="who" style="color:#9CC2FF">Tab 5</span><h3>Activities</h3><p>Watch the video, then play the class activity</p>
+        </a>
+        <a class="mission" href="#references">
+          <span class="ic" style="background:var(--white)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1A4D" stroke-width="2" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5V4Z"/><path d="M9 12h6M9 16h6"/></svg></span>
+          <span class="who" style="color:var(--on-dark-muted)">Tab 6</span><h3>References</h3><p>Every source behind every fact</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= TAB 2: PHISHING ================= -->
+<main class="page" data-page="phishing" hidden>
+  <section class="page-banner">
+    <div class="wrap">
+      <div class="note">Sites: Header type "Large banner" · navy background</div>
+      <p class="eyebrow">Tab 2 · Phishing</p>
+      <h1>Phishing: When <em>"Log In Here"</em> Is a Trap</h1>
+      <p class="sub">One message. One click. That's all it takes.</p>
+      <nav class="jumpbar" aria-label="Jump to part of the page">
+        <div class="note" style="width:100%">Sites: 3 Buttons · each linked to a heading (hover a heading → copy link)</div>
+        <a href="#trap"><span class="dot" style="background:var(--orange)"></span>The Trap</a>
+        <a href="#damage"><span class="dot" style="background:var(--red)"></span>The Damage</a>
+        <a href="#fix"><span class="dot" style="background:#5EEAD4"></span>The Fix</a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="band dark" id="trap">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>Red alert · The trap</div>
+      <h2 class="sec-title">Anatomy of a phishing message</h2>
+      <div class="anatomy">
+        <div>
+          <div class="note">Sites: Image (your Fig. 1) in left column</div>
+          <div class="phone">
+            <div class="phone-head"><span class="avatar">P</span><div><b>Pixora <i class="mark">1</i></b><small>Text message · 9:41</small></div></div>
+            <div class="msg"><span class="hl">Pixora Security Alert:</span> a new device logged into your account. <span class="hl">Verify within 24 hours</span><i class="mark">2</i> or your account will be locked.
+              <span class="lnk">pixora-account-verify.net <i class="mark">3</i></span></div>
+            <span class="stamp">FAKE</span>
+          </div>
+          <p class="made-up"><b>Fig. 1.</b> Example of a phishing text message from a fictional brand. Based on [1], [4].</p>
+        </div>
+        <div class="steps">
+          <div class="note">Sites: Text box in right column</div>
+          <div class="step"><span class="n">1</span><div><h3>The disguise</h3><p>The scammer pretends to be a brand, a bank or even a friend. Familiar names make the message feel safe <span class="cite">[1]</span>.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h3>The pressure</h3><p>The message gives you a reason to act right now, like a locked account or a 24-hour deadline. Urgency stops you from thinking twice <span class="cite">[4]</span>.</p></div></div>
+          <div class="step"><span class="n">3</span><div><h3>The copy</h3><p>The link opens a page that looks almost identical to the real site, logo and all <span class="cite">[1]</span>. Nothing about it looks fake at first glance.</p></div></div>
+          <div class="step"><span class="n">4</span><div><h3>The catch</h3><p>Everything you type goes straight to the scammer, who can use your login or sell it to someone else <span class="cite">[1]</span>. Even a friend's link isn't safe if their account was taken over <span class="cite">[2]</span>.</p></div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:72px">
+        <div class="note">Sites: Image of a bar chart made in Canva, or 3 stacked text boxes</div>
+        <p class="eyebrow">How often?</p>
+        <h2 class="sec-title">Scams don't wait for you to be ready</h2>
+        <div class="ladder" role="img" aria-label="79% see online scams every month, 45% every week, 20% every day">
+          <div class="rung"><span class="when">Every month</span><div class="bar-track"><div class="bar b1" style="width:79%">79%</div></div></div>
+          <div class="rung"><span class="when">Every week</span><div class="bar-track"><div class="bar b2" style="width:45%">45%</div></div></div>
+          <div class="rung"><span class="when">Every day</span><div class="bar-track"><div class="bar b3" style="width:20%">20%</div></div></div>
+        </div>
+        <p class="source-line">UK 8–17 year-olds who see online scams, UK Safer Internet Centre, 2025 [3]. Covers all online scams.</p>
+        <div class="ninth">
+          <div class="people" id="people" aria-hidden="true"></div>
+          <p><b>1 in 9</b> UK 8–17 year-olds say they've already fallen for a phishing scam <span class="cite">[3]</span>. That's around three students in a typical class.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:72px">
+        <div class="note">Sites: 4-column layout of small text boxes</div>
+        <p class="eyebrow">It's not just texts</p>
+        <h2 class="sec-title">Phishing has many disguises</h2>
+        <div class="channels">
+          <div class="channel"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><h3>Emails</h3><p>The most common form of phishing <span class="cite">[4]</span>. Attackers often pose as big account providers or even a coworker.</p></div>
+          <div class="channel"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg><h3>Phone calls</h3><p>Scammers can phish by voice too <span class="cite">[1], [4]</span>. They pose as a trusted organisation to get your details.</p></div>
+          <div class="channel"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg><h3>QR codes</h3><p>One scan can open a fake website <span class="cite">[1]</span>. You never even see the link before it loads.</p></div>
+          <div class="channel"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/></svg><h3>Fake support DMs</h3><p>"Customer service" profiles on social media that send malicious links <span class="cite">[1]</span>. They look helpful, but they're the trap.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band darker" id="damage">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>The damage</div>
+      <h2 class="sec-title">What one click can cost you</h2>
+      <div class="note" style="margin-top:14px">Sites: 3 + 2 text boxes · section background = darkest</div>
+      <div class="cost-grid">
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/></svg></span>
+          <h3>Your money</h3>
+          <p>Phishing can lead to stolen money and fraudulent charges on your cards <span class="cite">[4]</span>. Almost 1 in 10 UK 8–17 year-olds have already lost money to an online scam <span class="cite">[3]</span>.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg></span>
+          <h3>Your accounts</h3>
+          <p>Once scammers have your login, you can lose access to your own photos, videos and files <span class="cite">[4]</span>. Your private messages and memories end up in a stranger's hands.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a4 4 0 0 1 7 0M15 10h3M15 14h3"/></svg></span>
+          <h3>Your identity</h3>
+          <p>Some fake websites are built specifically for identity theft <span class="cite">[1]</span>. Visiting one can even download malware that keeps collecting your data in the background <span class="cite">[1]</span>.</p>
+        </article>
+        <article class="cost wide">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20a6 6 0 0 1 12 0M14 19a4.5 4.5 0 0 1 8 0"/></svg></span>
+          <h3>Your friends</h3>
+          <p>A hacked account becomes the scammer's new disguise. Criminals can pretend to be you and put the people you know at risk <span class="cite">[4]</span>, and your friends will trust "your" link just like you'd trust theirs <span class="cite">[2]</span>.</p>
+        </article>
+        <article class="cost wide">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 16s1.5-2 4-2 4 2 4 2M9 9.5h.01M15 9.5h.01"/></svg></span>
+          <h3>Your peace of mind</h3>
+          <p>Scams hurt more than your wallet. Among UK 8–17 year-olds who were scammed online <span class="cite">[3]</span>:</p>
+          <div class="feel"><span><b>47%</b> felt angry</span><span><b>39%</b> felt upset</span><span><b>31%</b> felt worried</span><span><b>26%</b> blamed themselves</span></div>
+        </article>
+      </div>
+
+      <div class="ripple">
+        <div>
+          <div class="note">Sites: Insert → Drawing (Google Drawings)</div>
+          <svg viewBox="0 0 400 400" role="img" aria-label="Ripple diagram: you, your hacked account, your friends, their friends">
+            <circle cx="200" cy="200" r="190" fill="#B91C1C" fill-opacity=".14" stroke="#B91C1C" stroke-opacity=".5" stroke-width="2"/>
+            <circle cx="200" cy="200" r="140" fill="#C2410C" fill-opacity=".2" stroke="#C2410C" stroke-opacity=".6" stroke-width="2"/>
+            <circle cx="200" cy="200" r="92" fill="#C2410C" fill-opacity=".35" stroke="#F59E5B" stroke-width="2"/>
+            <circle cx="200" cy="200" r="46" fill="#F59E5B"/>
+            <text x="200" y="207" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="800" font-size="20" fill="#1E1A4D">You</text>
+            <text x="200" y="132" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="700" font-size="15" fill="#FFFFFF">Hacked account</text>
+            <text x="200" y="82" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="700" font-size="15" fill="#FFFFFF">Your friends</text>
+            <text x="200" y="34" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="700" font-size="15" fill="#FFFFFF">Their friends</text>
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">The ripple effect</p>
+          <h3>One click doesn't just affect you.</h3>
+          <p>A scammer inside your account can pretend to be you and put the people you know at risk <span class="cite">[4]</span>. If one of them clicks, the trap spreads again.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="big">+35%</div>
+        <div>
+          <div class="note" style="background:#FFF1E8">Sites: Text box on a coloured section</div>
+          <h3>It's not just a UK problem.</h3>
+          <p>In January 2026, the UAE Cybersecurity Council reported that scam messages had risen by 35% in a single year. It also warned that more than 90% of breaches begin with a phishing message <span class="cite">[5]</span>.</p>
+          <div class="quotes"><span>"You've won!"</span><span>"You have a refund"</span><span>"Verify your bank account"</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="turn">
+    <div class="wrap">
+      <div class="note" style="margin-inline:auto">Sites: Full-width section with a gradient image as background</div>
+      <div class="switch">Red alert <i aria-hidden="true"></i> All clear</div>
+      <h2>Now the good news.</h2>
+      <p>Every trap has a tell, and you're about to learn them.</p>
+    </div>
+  </section>
+
+  <section class="band light" id="fix">
+    <div class="wrap">
+      <p class="eyebrow">The fix</p>
+      <h2 class="sec-title">Four moves that beat the scammer</h2>
+      <div class="note" style="margin-top:14px">Sites: 4-column card layout · section background = light</div>
+      <div class="moves">
+        <article class="move"><span class="n">1</span><h3>Hit pause</h3><p>Scams are designed to rush you, so slowing down is your first defence. 86% of UK 8–17 year-olds already see pressure to act fast as a red flag <span class="cite">[3]</span>. Trust that instinct.</p></article>
+        <article class="move"><span class="n">2</span><h3>Inspect the clues</h3><p>Check the sender's real email address, not just the display name, which can be faked <span class="cite">[4]</span>. Hover over or long-press a link to see where it actually goes <span class="cite">[4]</span>.</p></article>
+        <article class="move"><span class="n">3</span><h3>Go around the message</h3><p>Never use the link or number inside a suspicious message. Open the official app or type the website yourself, and confirm through a trusted, official channel <span class="cite">[5]</span>.</p></article>
+        <article class="move"><span class="n">4</span><h3>Call in backup</h3><p>Not sure? Check with a parent or trusted adult <span class="cite">[2]</span>. 72% of UK 8–17 year-olds would turn to a parent or carer if they thought they were being scammed <span class="cite">[3]</span>.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <p class="eyebrow">Red flag checklist</p>
+      <h2 class="sec-title">Tap a flag to learn the trick</h2>
+      <div class="note" style="margin-top:14px">Sites: Collapsible text group · one item per flag</div>
+      <div class="flags">
+        <details class="flag"><summary><span class="f">🚩</span><span class="t">"Act now!"</span><span class="chev">▸</span></summary><p class="ans">Urgent deadlines and threats are a classic phishing tactic. They push you to click before you think <span class="cite">[4], [5]</span>.</p></details>
+        <details class="flag"><summary><span class="f">🚩</span><span class="t">"Dear Valued Customer"</span><span class="chev">▸</span></summary><p class="ans">Companies you actually deal with use your name. A generic greeting is a warning sign <span class="cite">[4]</span>.</p></details>
+        <details class="flag"><summary><span class="f">🚩</span><span class="t mono">pix0ra.com</span><span class="chev">▸</span></summary><p class="ans">One swapped letter, like a zero for an "o", can hide a fake address that looks right at a glance <span class="cite">[4]</span>.</p></details>
+        <details class="flag"><summary><span class="f">🚩</span><span class="t">"You've won!"</span><span class="chev">▸</span></summary><p class="ans">Prizes you never entered for are one of the most common scam messages in the UAE <span class="cite">[5]</span>.</p></details>
+        <details class="flag"><summary><span class="f">🚩</span><span class="t">"Send your password"</span><span class="chev">▸</span></summary><p class="ans">Most trustworthy people and companies won't ask for your private information online <span class="cite">[2]</span>.</p></details>
+        <details class="flag"><summary><span class="f">🚩</span><span class="t">A text from your own number</span><span class="chev">▸</span></summary><p class="ans">The UAE Cybersecurity Council lists messages that seem to come from your own number as a common trick <span class="cite">[5]</span>.</p></details>
+      </div>
+
+      <div class="xray">
+        <div>
+          <div class="note">Sites: Embed → Embed code (custom widget)</div>
+          <p class="eyebrow" style="color:var(--orange-soft)">Link X-ray</p>
+          <h3>See where a link really goes</h3>
+          <p>Both buttons say the same thing. Hover over one, or tap it, to reveal the address hiding underneath <span class="cite">[4]</span>.</p>
+        </div>
+        <div class="xray-demo">
+          <button class="xbtn" type="button" data-addr="pixora.com/account" data-safe="1"><span>Check your Pixora account</span><span>Link A</span></button>
+          <button class="xbtn" type="button" data-addr="pix0ra-account.net/verify" data-safe="0"><span>Check your Pixora account</span><span>Link B</span></button>
+          <div class="xray-out" id="xrayOut" aria-live="polite">
+            <span class="lab">Real address</span>
+            <span class="addr">Hover or tap a link above</span>
+            <span class="verdict"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grey">
+    <div class="wrap">
+      <p class="eyebrow">Lock it down</p>
+      <h2 class="sec-title">Make stolen passwords useless</h2>
+      <div class="duo">
+        <div class="card"><h3>Turn on two-factor authentication</h3><p>Even if a scammer steals your password, they still can't get in without the second step <span class="cite">[1], [5]</span>.</p></div>
+        <div class="card"><h3>Block, delete, report</h3><p>Don't reply to a scam message, even to say no. Block the sender, delete the message and report it <span class="cite">[5]</span>.</p></div>
+      </div>
+      <div class="help">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+        <div>
+          <h3>Already shared your details? Don't panic.</h3>
+          <p>Change your password straight away and turn on two-factor authentication <span class="cite">[4]</span>. Report the message and watch your accounts for anything unusual <span class="cite">[4]</span>. Then tell a trusted adult.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="note">Sites: Image of the bars (made in Canva) + text box</div>
+      <p class="eyebrow">The confidence gap</p>
+      <h2 class="sec-title">Knowing the signs isn't the same as spotting them</h2>
+      <div class="gap-bars" role="img" aria-label="86% would be wary of pressure to act fast, but only 32% feel confident spotting a scam; 47% say embarrassment stops young people asking for help">
+        <div class="gbar"><div class="row"><span>Would be wary of a message rushing them to act</span><b>86%</b></div><div class="gtrack"><div class="gfill" style="width:86%;background:var(--teal)"></div></div></div>
+        <div class="gbar"><div class="row"><span>Are sure they could tell when something is a scam</span><b>32%</b></div><div class="gtrack"><div class="gfill" style="width:32%;background:var(--orange)"></div></div></div>
+        <div class="gbar"><div class="row"><span>Say embarrassment stops young people getting help</span><b>47%</b></div><div class="gtrack"><div class="gfill" style="width:47%;background:var(--navy)"></div></div></div>
+      </div>
+      <p class="source-line">UK 8–17 year-olds, UK Safer Internet Centre, 2025 [3].</p>
+      <p class="gap-quote">Asking is never embarrassing. <span>Getting scammed is worse.</span></p>
+    </div>
+  </section>
+
+  <section class="bottom-line">
+    <div class="wrap"><p><b>A familiar logo is not proof.</b> Pause, check the link, and verify through a route you trust.</p></div>
+  </section>
+</main>
+
+<!-- ================= TAB 3: FAKE ONLINE SHOPS ================= -->
+<main class="page" data-page="shops" hidden>
+  <section class="page-banner">
+    <div class="wrap banner-grid">
+      <div>
+        <div class="note">Sites: Header type "Large banner" + image of a fake ad (Fig. 2)</div>
+        <p class="eyebrow">Tab 3 · Fake Online Shops</p>
+        <h1>Fake Online Shops: When <em>the Deal</em> Is the Trap</h1>
+        <p class="sub">Real logos. Unreal prices. Sometimes nothing in the box.</p>
+        <nav class="jumpbar" aria-label="Jump to part of the page">
+          <a href="#bait"><span class="dot" style="background:var(--green-bright)"></span>The Bait</a>
+          <a href="#shop-damage"><span class="dot" style="background:var(--red)"></span>The Damage</a>
+          <a href="#shop-fix"><span class="dot" style="background:var(--white)"></span>The Fix</a>
+        </nav>
+      </div>
+      <figure class="fig">
+        <div class="ad" aria-label="Example of a fake shopping ad">
+          <div class="ad-head"><span class="avatar" style="background:var(--green)">S</span><div><b>StepUp Kicks</b><small>Sponsored</small></div></div>
+          <div class="deal"><b>90% OFF</b>Designer sneakers · today only!</div>
+          <div class="shop">Shop now</div>
+          <span class="stamp">FAKE</span>
+        </div>
+        <figcaption class="fig-cap"><b>Fig. 2.</b> Example of a fake social media shopping ad from a fictional brand. Based on [6], [10].</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap split">
+      <div>
+        <div class="note">Sites: 2-column layout · text left, quote box right</div>
+        <p class="eyebrow">Why this matters</p>
+        <h2>You've probably already seen one today</h2>
+        <p>Fake online shops and misleading social media ads can trick teenagers into trusting offers that are not real. They show up between posts from friends and creators, so they don't look out of place. The ad looks polished, the brand looks familiar, and the price looks like luck.</p>
+        <p>The problem is that a scam doesn't need to look like a scam to work. It only needs you to click "Shop now" before you check who you're really buying from.</p>
+      </div>
+      <div class="quote-box">
+        <p class="q-big">"Unusually low prices are a sign of a scam."</p>
+        <p class="q-src">The US Federal Trade Commission's shopping advice <span class="cite">[6]</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="bait">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>The bait</div>
+      <h2 class="sec-title">How fake shops win your trust</h2>
+      <div class="note" style="margin-top:14px">Sites: 2 × 2 text boxes</div>
+      <div class="fact-grid">
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg></span>
+          <h3>Borrowed brands</h3>
+          <p>Scammers use pictures and logos from real brands to make fake shopping websites look trustworthy <span class="cite">[6]</span>. A fake site can look just as polished and professional as the real one. Recognising a brand doesn't mean you're on that brand's website.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8L3 12Z"/><circle cx="7.5" cy="8" r="1.5"/></svg></span>
+          <h3>Prices that pull you in</h3>
+          <p>Social media ads can show expensive items like designer bags and scooters at very low prices <span class="cite">[6]</span>. The FTC warns that unusually low prices are a sign of a scam <span class="cite">[6]</span>. The bigger the discount, the more careful you should be.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+          <h3>Ads from impostors</h3>
+          <p>Scammers impersonate real companies on social media and run ads offering big discounts on brand-name products <span class="cite">[10]</span>. The ad leads to a fake website designed to steal money or information <span class="cite">[10]</span>. The seller in the ad may not be the brand at all.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18M12 8S10 3 7.5 4 9 8 12 8Zm0 0s2-5 4.5-4S15 8 12 8Z"/></svg></span>
+          <h3>"Congratulations, you won!"</h3>
+          <p>Fake giveaways are another way scammers trick people online. Scammers pretend to be a real business and tell people they have won prizes before asking for personal or financial information <span class="cite">[8]</span>. Because the message seems to come from a familiar company, it's easy to believe.</p>
+        </article>
+      </div>
+
+      <div class="why">
+        <h3>Why do teenagers fall for it?</h3>
+        <p>Teenagers might trust these offers because they recognise the brand or think they're getting a good deal, without realising they could lose money. A familiar logo makes the shop feel safe, and an exciting deal makes you want to act before it disappears. Scammers rely on both feelings at once.</p>
+      </div>
+
+      <div style="margin-top:64px">
+        <div class="note">Sites: 4-column layout of big-number text boxes</div>
+        <p class="eyebrow">By the numbers</p>
+        <h2 class="sec-title">Social media is where the shopping scams live</h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="num">44%</div><p>of social media fraud-loss reports in the first half of 2023 were about online shopping <span class="cite">[7]</span>. It was the most reported type of social media scam.</p></div>
+          <div class="stat"><div class="num">61%</div><p>of those online shopping reports were about orders that never arrived <span class="cite">[7]</span>. Clothing and electronics were the items people mentioned most.</p></div>
+          <div class="stat"><div class="num">1 in 4</div><p>people who reported losing money to fraud since 2021 said it started on social media <span class="cite">[7]</span>. Reported losses added up to $2.7 billion <span class="cite">[7]</span>.</p></div>
+          <div class="stat"><div class="num">47%</div><p>of 18–19 year-olds who reported losing money to fraud said it started on social media <span class="cite">[7]</span>. That was the highest share of any age group.</p></div>
+        </div>
+        <p class="source-line">All figures are reports to the US Federal Trade Commission, published October 2023 [7]. They describe social media fraud in general unless stated, not only fake shops.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band darker" id="shop-damage">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>The damage</div>
+      <h2 class="sec-title">What a fake shop can take from you</h2>
+      <div class="note" style="margin-top:14px">Sites: 2 × 2 text boxes · section background = darkest</div>
+      <div class="cost-grid four">
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#86E0A8" stroke-width="2" stroke-linejoin="round"><path d="M3 7 12 3l9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10"/></svg></span>
+          <h3>Nothing in the box</h3>
+          <p>Another problem with fake online shops is that customers might not receive what they paid for. People who buy from fake shopping websites might receive a different product than they ordered, or nothing at all <span class="cite">[6]</span>. If something does arrive, it may be a cheap knockoff <span class="cite">[10]</span>.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#86E0A8" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span>
+          <h3>Your payment details</h3>
+          <p>Teenagers could lose their money after trusting a website that looks real, even if the products and ads seem genuine. They might also put their personal or payment information at risk when entering their details. Fake shopping sites are built to steal money or information such as bank account numbers <span class="cite">[10]</span>.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#86E0A8" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a4 4 0 0 1 7 0M15 10h3M15 14h3"/></svg></span>
+          <h3>Your identity</h3>
+          <p>If you share personal information with a fake seller, the scammer may use it to steal your identity <span class="cite">[10]</span>. A "great deal" can end up costing far more than its price tag.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#86E0A8" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/><path d="m9 8 6 6M15 8l-6 6"/></svg></span>
+          <h3>Your device</h3>
+          <p>Links in fake giveaway messages might contain malware <span class="cite">[8]</span>. One tap on a "claim your prize" link can put your phone, and everything on it, at risk.</p>
+        </article>
+      </div>
+
+      <div class="giveaway">
+        <div class="dm" aria-label="Example of a fake giveaway message">
+          <div class="ad-head"><span class="avatar" style="background:var(--green);width:40px;height:40px;font-size:17px">G</span><div><b>Glow Studio</b><small>Direct message</small></div></div>
+          <div class="bub">Congratulations! You've been picked as the winner of our giveaway. Just enter your card details to claim your prize.
+            <span class="lnk">glowstudio-prize-claim.net</span></div>
+          <p style="font-size:12px;font-style:italic;color:var(--muted)">Glow Studio is a made-up brand.</p>
+        </div>
+        <div>
+          <p class="eyebrow">How fake giveaways work</p>
+          <h3>Why would a free prize need your card number?</h3>
+          <p>Scammers watch the followers of real businesses, then hijack real giveaways or pretend to be the business <span class="cite">[8]</span>. After you like, tag and share, someone who looks like the business owner tags you as a winner and asks for financial information to claim your prize <span class="cite">[8]</span>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="turn">
+    <div class="wrap">
+      <div class="switch">Red alert <i aria-hidden="true"></i> All clear</div>
+      <h2>Shop smarter.</h2>
+      <p>Check the seller before you check out.</p>
+    </div>
+  </section>
+
+  <section class="band light" id="shop-fix">
+    <div class="wrap">
+      <p class="eyebrow">The fix</p>
+      <h2 class="sec-title">Six checks before you buy or claim</h2>
+      <p class="sec-lead">Teenagers can reduce the risk of fake online shops by checking whether a seller is trustworthy before buying anything. None of these checks takes more than a minute.</p>
+      <div class="note" style="margin-top:14px">Sites: 3-column card layout · section background = light</div>
+      <div class="tips">
+        <article class="tip"><span class="n">1</span><h3>Check the seller</h3><p>Look at seller ratings, recent reviews, contact information and return policies before you buy <span class="cite">[9]</span>. A real shop makes it easy to contact them and return things.</p></article>
+        <article class="tip"><span class="n">2</span><h3>Don't trust reviews alone</h3><p>Search for complaints about the seller and compare reviews from different websites <span class="cite">[9]</span>. Some reviews can be fake or misleading, so a page full of five stars isn't proof.</p></article>
+        <article class="tip"><span class="n">3</span><h3>Search the name</h3><p>Search the seller's name with words like "review", "complaint" or "scam" to see what other buyers say <span class="cite">[6], [10]</span>. Don't assume the seller is the brand named in the ad <span class="cite">[10]</span>.</p></article>
+        <article class="tip"><span class="n">4</span><h3>Compare the price</h3><p>Research the seller and compare prices with other shops, especially when products are advertised at unusually low prices <span class="cite">[10]</span>. If it's much, much cheaper than everywhere else, it's probably a scam <span class="cite">[10]</span>.</p></article>
+        <article class="tip"><span class="n">5</span><h3>Watch how they want paying</h3><p>Never buy from a seller who insists on gift cards, wire transfers, payment apps or cryptocurrency <span class="cite">[6], [10]</span>. The FTC says only scammers demand payment that way <span class="cite">[10]</span>.</p></article>
+        <article class="tip"><span class="n">6</span><h3>Confirm giveaways at the source</h3><p>Contact the business through its official website or contact details to confirm whether a giveaway is real <span class="cite">[8]</span>. Avoid clicking links in the prize message itself.</p></article>
+      </div>
+
+      <div class="detector">
+        <div>
+          <div class="note">Sites: Embed → Embed code (custom widget)</div>
+          <p class="eyebrow" style="color:var(--green-bright)">Deal detector</p>
+          <h3>Is that offer too good to be true?</h3>
+          <p class="lead">Think of an ad or shop you've seen recently. Tick every sign that applies and watch the warning level rise.</p>
+        </div>
+        <div>
+          <div class="checks-list" id="detector">
+            <label class="chk"><input type="checkbox" id="dd1"><span>The price is much, much lower than other shops <span class="cite">[10]</span></span></label>
+            <label class="chk"><input type="checkbox" id="dd2"><span>It uses a real brand's pictures or logo, but you're not on the brand's own website <span class="cite">[6]</span></span></label>
+            <label class="chk"><input type="checkbox" id="dd3"><span>The seller only takes gift cards, wire transfers, payment apps or crypto <span class="cite">[10]</span></span></label>
+            <label class="chk"><input type="checkbox" id="dd4"><span>There's no clear contact information or return policy <span class="cite">[9]</span></span></label>
+            <label class="chk"><input type="checkbox" id="dd5"><span>A "free" prize asks for your card details <span class="cite">[8]</span></span></label>
+          </div>
+          <div class="meter" aria-live="polite">
+            <div class="meter-track"><div class="meter-fill" id="ddFill"></div></div>
+            <p class="verdict-text" id="ddText">No warning signs ticked yet. Still research the seller before you buy.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+        <div>
+          <h3>Already paid? Act fast.</h3>
+          <p>Contact the seller first, and if that doesn't work, dispute the charge with your payment provider <span class="cite">[6]</span>. Paying by credit card gives the best protection, because charges can be disputed <span class="cite">[10]</span>. Then report the scam and tell a trusted adult.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bottom-line">
+    <div class="wrap"><p><b>Exciting isn't the same as real.</b> Don't trust an offer just because it looks exciting or comes from a familiar brand. Check the offer first and avoid suspicious links.</p></div>
+  </section>
+</main>
+
+<!-- ================= TAB 4: IMPERSONATION AND AI ================= -->
+<main class="page" data-page="impersonation" hidden>
+  <section class="page-banner">
+    <div class="wrap banner-grid">
+      <div>
+        <div class="note">Sites: Header type "Large banner" + image of a call screen (Fig. 3)</div>
+        <p class="eyebrow">Tab 4 · Impersonation and AI</p>
+        <h1>Impersonation and AI: When <em>the Voice</em> Isn't Really Theirs</h1>
+        <p class="sub">It sounds like family. It looks like a friend. It might be neither.</p>
+        <nav class="jumpbar" aria-label="Jump to part of the page">
+          <a href="#ai-trick"><span class="dot" style="background:var(--magenta-bright)"></span>The Trick</a>
+          <a href="#ai-damage"><span class="dot" style="background:var(--red)"></span>The Damage</a>
+          <a href="#ai-fix"><span class="dot" style="background:var(--white)"></span>The Fix</a>
+        </nav>
+      </div>
+      <figure class="fig">
+        <div class="call" aria-label="Example of a scam call screen">
+          <span class="av">S</span>
+          <b>Cousin Sara</b>
+          <small>Incoming call…</small>
+          <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <q>It's me! I'm in trouble, send money right now!</q>
+          <div class="btns" aria-hidden="true">
+            <span style="background:var(--red)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M3 15c5-5 13-5 18 0l-2.5 2.5-3.5-2v-3a14 14 0 0 0-6 0v3l-3.5 2L3 15Z"/></svg></span>
+            <span style="background:#16A34A"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span>
+          </div>
+        </div>
+        <figcaption class="fig-cap"><b>Fig. 3.</b> Example of an impersonation call using a fictional relative's cloned voice. Based on [11].</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap split">
+      <div>
+        <div class="note">Sites: 2-column layout · text left, quote box right</div>
+        <p class="eyebrow">Why this matters</p>
+        <h2>Your ears and eyes can be fooled</h2>
+        <p>Impersonation scams used to depend on a convincing story. Now, with artificial intelligence, scammers can copy the voice or face of someone you know. That makes it difficult to recognise a scam when you hear a familiar voice or see a familiar face.</p>
+        <p>This tab explains how these scams work, why they're so convincing, and the simple steps that stop them, even when the voice sounds exactly right.</p>
+      </div>
+      <div class="quote-box">
+        <p class="q-big">Scammers can clone a family member's voice to make a fake emergency seem real.</p>
+        <p class="q-src">The US Federal Trade Commission <span class="cite">[11]</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="ai-trick">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>The trick</div>
+      <h2 class="sec-title">How impersonators fool you</h2>
+      <div class="note" style="margin-top:14px">Sites: 2 × 2 text boxes</div>
+      <div class="fact-grid">
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg></span>
+          <h3>Someone you trust</h3>
+          <p>Impersonation is a type of scam in which criminals pretend to be someone trustworthy to steal money or personal information. For example, scammers might pretend to be a friend, a family member or a company employee. The more familiar they seem, the less likely you are to question them.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg></span>
+          <h3>Cloned voices</h3>
+          <p>With AI, these scams have become more convincing because scammers can use cloned voices to imitate real people <span class="cite">[11]</span>. AI-generated voices copy how a person sounds <span class="cite">[11], [12]</span>. A call can sound exactly like someone you know without being them.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span>
+          <h3>Deepfake videos</h3>
+          <p>Deepfake videos can make someone appear to say or do things they never actually did <span class="cite">[11], [12]</span>. A video call or clip of a familiar face is no longer proof of who you're talking to.</p>
+        </article>
+        <article class="fact">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span>
+          <h3>The fake emergency</h3>
+          <p>A scammer calls pretending to be a relative in trouble, then asks you to send money right away <span class="cite">[11]</span>. The urgency is designed to stop you from checking the story first <span class="cite">[11]</span>.</p>
+        </article>
+      </div>
+
+      <div class="why">
+        <h3>Why does it work so well?</h3>
+        <p>People are more likely to act when a call sounds like their boss or a family member <span class="cite">[11]</span>. Add a panicked voice and a deadline, and most people want to help first and ask questions later. Scammers count on that kindness.</p>
+      </div>
+
+      <div style="margin-top:56px">
+        <div class="note">Sites: 3-column layout of text boxes</div>
+        <p class="eyebrow">Spot the script</p>
+        <h2 class="sec-title">Three lines impersonators love to use</h2>
+        <div class="channels three">
+          <div class="channel"><h3>"I'm in trouble"</h3><p>The caller sounds like a relative and says something has gone wrong <span class="cite">[11]</span>. The emotional shock is meant to make you react, not think.</p></div>
+          <div class="channel"><h3>"Send it right now"</h3><p>The request for money comes with a deadline <span class="cite">[11]</span>. Real emergencies can wait the two minutes it takes to call back on a number you know.</p></div>
+          <div class="channel"><h3>"It's your boss"</h3><p>Some scammers clone the voice of someone in charge and ask for things like bank account numbers <span class="cite">[11]</span>. Authority makes people less likely to question the request.</p></div>
+        </div>
+      </div>
+
+      <div style="margin-top:64px">
+        <div class="note">Sites: 4-column layout of big-number text boxes</div>
+        <p class="eyebrow">By the numbers</p>
+        <h2 class="sec-title">Impersonation is big business for scammers</h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="num">$3.5B</div><p>People reported losing $3.5 billion to impersonation scams in 2025 <span class="cite">[12]</span>. This includes impersonation in general, not only AI-related scams.</p></div>
+          <div class="stat"><div class="num">~3×</div><p>Reported losses to impersonation scams have risen nearly three times since 2020 <span class="cite">[12]</span>. The problem is growing fast.</p></div>
+          <div class="stat"><div class="num">1 in 3</div><p>Nearly one in three fraud reports in 2025 were about impersonation scams <span class="cite">[12]</span>. That made it the most reported type of fraud.</p></div>
+          <div class="stat"><div class="num">$1B</div><p>Nearly $1 billion was reported lost to scammers pretending to be businesses <span class="cite">[12]</span>. Bank impersonators caused the highest reported losses.</p></div>
+        </div>
+        <p class="source-line">All figures are reports to the US Federal Trade Commission for 2025 [12]. They cover impersonation scams in general, which highlights the financial harm these crimes can cause.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band darker" id="ai-damage">
+    <div class="wrap">
+      <div class="alert-strip"><span class="pulse" aria-hidden="true"></span>The damage</div>
+      <h2 class="sec-title">What one convincing call can cost</h2>
+      <div class="note" style="margin-top:14px">Sites: 2 × 2 text boxes · section background = darkest</div>
+      <div class="cost-grid four">
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F7A6CC" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/></svg></span>
+          <h3>Your money</h3>
+          <p>Victims of impersonation scams may lose money <span class="cite">[13]</span>. A single panicked transfer to a "relative" in trouble can be all it takes.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F7A6CC" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a4 4 0 0 1 7 0M15 10h3M15 14h3"/></svg></span>
+          <h3>Your personal information</h3>
+          <p>Impersonators can steal your personal information <span class="cite">[13]</span>. Details you share with a "familiar" voice can be used against you later.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F7A6CC" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg></span>
+          <h3>Your accounts</h3>
+          <p>Victims may experience unauthorised access to their accounts <span class="cite">[13]</span>. Once someone is in, your messages and private details are no longer private.</p>
+        </article>
+        <article class="cost">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F7A6CC" stroke-width="2" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span>
+          <h3>Your reputation</h3>
+          <p>Fake videos can spread misinformation or damage someone's reputation <span class="cite">[13]</span>. A deepfake can make it look like a person said or did something they never did <span class="cite">[11], [12]</span>.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="turn">
+    <div class="wrap">
+      <div class="switch">Red alert <i aria-hidden="true"></i> All clear</div>
+      <h2>Verify, don't trust.</h2>
+      <p>A realistic voice or video is not proof.</p>
+    </div>
+  </section>
+
+  <section class="band light" id="ai-fix">
+    <div class="wrap">
+      <p class="eyebrow">The fix</p>
+      <h2 class="sec-title">Four steps when a familiar voice asks for money</h2>
+      <p class="sec-lead">Teenagers can protect themselves from impersonation scams by verifying unexpected requests before sending money or sharing personal information, even when the voice, video or account seems familiar.</p>
+      <div class="note" style="margin-top:14px">Sites: 4-column card layout · section background = light</div>
+      <div class="tips four">
+        <article class="tip"><span class="n">1</span><h3>Don't respond straight away</h3><p>Be careful with urgent requests through calls, messages or video chats. Scammers may pretend to be in an emergency to pressure people into sending money quickly <span class="cite">[11]</span>.</p></article>
+        <article class="tip"><span class="n">2</span><h3>Call back on a known number</h3><p>Contact the person directly using a phone number you already know, instead of trusting the voice alone <span class="cite">[11]</span>. If the emergency is real, they'll confirm it.</p></article>
+        <article class="tip"><span class="n">3</span><h3>Can't reach them? Ask family</h3><p>If you can't get hold of the person, try other family members or their friends <span class="cite">[11]</span>. Check the story before you send anything.</p></article>
+        <article class="tip"><span class="n">4</span><h3>Ask a trusted adult</h3><p>If you're unsure, ask a trusted adult for help before you act. These steps can reduce the risk of losing money or exposing private information.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="note">Sites: Insert → Drawing (Google Drawings) or a vertical image</div>
+      <p class="eyebrow">Your verification plan</p>
+      <h2 class="sec-title">An unexpected request for money? Follow the path.</h2>
+      <div class="flow">
+        <div class="fstep q"><span class="dot">?</span><div><h3>"It's me, I need money now!"</h3><p>A call, message or video chat asks for money or personal information urgently <span class="cite">[11]</span>.</p></div></div>
+        <div class="fstep"><span class="dot">1</span><div><h3>Stop. Don't send anything yet.</h3><p>The pressure is part of the trick <span class="cite">[11]</span>.</p></div></div>
+        <div class="fstep"><span class="dot">2</span><div><h3>Hang up and call their real number</h3><p>Use a number you already know, not one the caller gives you <span class="cite">[11]</span>.</p></div></div>
+        <div class="fstep"><span class="dot">3</span><div><h3>No answer? Check with family or friends</h3><p>Someone close to them can confirm where they really are <span class="cite">[11]</span>.</p></div></div>
+        <div class="fstep"><span class="dot">✓</span><div><h3>Still unsure? Ask a trusted adult</h3><p>A second opinion can stop a scam before any money or information is lost.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bottom-line">
+    <div class="wrap"><p><b>A familiar voice is not proof.</b> Even a realistic voice or video is not always proof that someone is who they claim to be. Think carefully before responding.</p></div>
+  </section>
+</main>
+
+<!-- ================= TAB 5: ACTIVITIES ================= -->
+<main class="page" data-page="activities" hidden>
+  <section class="page-banner">
+    <div class="wrap">
+      <div class="note">Sites: Header type "Banner"</div>
+      <p class="eyebrow">Tab 5 · Activities</p>
+      <h1>Activities: <em>Practise</em> Spotting the Fake</h1>
+      <p class="sub">Watch, play and test yourself on everything from the research tabs.</p>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="note">Sites: Insert → YouTube (left) · Embed → Embed code from Wordwall's Share → Embed (right)</div>
+      <p class="eyebrow">Start here</p>
+      <h2 class="sec-title">Watch the video, then play the class activity</h2>
+      <div class="feature-grid">
+        <a class="feature" href="https://youtu.be/EHqXMxY4_Nk?si=Lv-UgHmx8EW5emzb" target="_blank" rel="noopener">
+          <span class="kind">Informative video</span>
+          <div class="screen"><span><svg width="34" height="34" viewBox="0 0 24 24" fill="#1E1A4D"><path d="M8 5v14l11-7L8 5Z"/></svg></span></div>
+          <h3>How to Protect Yourself Against Cybercrime</h3>
+          <p>On the live site the video plays right here on the page.</p>
+          <span class="u">youtu.be/EHqXMxY4_Nk</span>
+        </a>
+        <a class="feature wordwall" href="https://wordwall.net/resource/121309880?wwmethod=link" target="_blank" rel="noopener">
+          <span class="kind">Class activity</span>
+          <div class="tiles" aria-hidden="true"><i>?</i><i>✓</i><i>?</i><i>✗</i><i>?</i><i>✓</i></div>
+          <h3>Fact or Fake? The Wordwall Challenge</h3>
+          <p>On the live site the game is playable right here on the page.</p>
+          <span class="u">wordwall.net/resource/121309880</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="note">Sites: 3 images (made in Canva) + a Collapsible text answer under each</div>
+      <p class="eyebrow">Warm-up</p>
+      <h2 class="sec-title">Three rounds, one from each tab</h2>
+      <div class="rounds">
+        <article class="round" data-round="1">
+          <span class="rl">Round 1 · Phishing</span>
+          <div class="scene dk">
+            <p style="font-weight:600">Pixora wants you to log in…</p>
+            <div class="chip"><i>A</i>pixora.com/login</div>
+            <div class="chip"><i>B</i>pixora-verify.net/login</div>
+          </div>
+          <h3>Which link is the real one?</h3>
+          <div class="choices">
+            <button class="choice" type="button" data-ok="1">A) pixora.com/login</button>
+            <button class="choice" type="button" data-ok="0">B) pixora-verify.net/login</button>
+          </div>
+          <p class="feedback"><b>A is real.</b> B puts the brand name on a different address that only looks similar <span class="cite">[1]</span>.</p>
+        </article>
+        <article class="round" data-round="2">
+          <span class="rl">Round 2 · Fake online shops</span>
+          <div class="scene post">
+            <div class="ad-head"><span class="avatar" style="width:38px;height:38px;font-size:16px;background:var(--green)">S</span><div><b>StepUp Kicks</b><small>Sponsored</small></div></div>
+            <div class="deal"><b>90% OFF</b>Designer sneakers · today only!</div>
+          </div>
+          <h3>What do you do?</h3>
+          <div class="choices">
+            <button class="choice" type="button" data-ok="0">A) Buy now before they sell out</button>
+            <button class="choice" type="button" data-ok="1">B) Research the seller and compare prices first</button>
+          </div>
+          <p class="feedback"><b>B.</b> Prices much lower than everywhere else are a sign of a scam, so check the seller first <span class="cite">[10]</span>.</p>
+        </article>
+        <article class="round" data-round="3">
+          <span class="rl">Round 3 · Impersonation and AI</span>
+          <div class="scene dk">
+            <div class="caller"><span class="av">S</span><p style="font-weight:700">Cousin Sara<br><span style="color:var(--magenta-bright);font-weight:600">calling…</span></p><q>It's me! I'm in trouble, send money right now!</q></div>
+          </div>
+          <h3>What do you do?</h3>
+          <div class="choices">
+            <button class="choice" type="button" data-ok="0">A) Send it, it's her voice</button>
+            <button class="choice" type="button" data-ok="1">B) Hang up and call her real number</button>
+          </div>
+          <p class="feedback"><b>B.</b> Voices can be cloned, so call back on a number you already know is hers <span class="cite">[11]</span>.</p>
+        </article>
+      </div>
+      <div class="score" aria-live="polite">
+        <span class="s" id="scoreNum">0/3</span>
+        <span class="badge" id="scoreBadge">Answer all three rounds to get your badge.</span>
+        <button class="reset" id="resetQuiz" type="button">Play again</button>
+      </div>
+      <p class="source-line">All brands and names in these rounds are made up.</p>
+    </div>
+  </section>
+
+  <section class="band grey">
+    <div class="wrap trap">
+      <div>
+        <div class="note">Sites: Embed → Embed code (custom widget)</div>
+        <p class="eyebrow">Trap simulator</p>
+        <h2>Would you have logged in?</h2>
+        <p class="lead">This login card copies everything a real one looks like. Press the button to see what would happen on a real fake page. Nothing you do here is saved or sent.</p>
+      </div>
+      <div class="login">
+        <div class="lbar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A4870" stroke-width="2.5" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="addr">pixora-account-verify.net/login</span></div>
+        <div class="body" id="trapFront">
+          <div class="logo"><span class="avatar">P</span>Pixora</div>
+          <p style="font-weight:600">Verify your account to keep it active.</p>
+          <label for="trapUser">Username<input id="trapUser" type="text" value="your.name" readonly></label>
+          <button class="go" id="trapGo" type="button">Log in to Pixora</button>
+        </div>
+        <div class="gotcha" id="trapBack" hidden>
+          <h3>Gotcha!</h3>
+          <p>On a real fake page, your login would now belong to the scammer <span class="cite">[1]</span>. Did you notice these?</p>
+          <ul>
+            <li>The address isn't pixora.com.</li>
+            <li>It pushed you to act right now.</li>
+            <li>It looked exactly like the real thing.</li>
+          </ul>
+          <button class="again" id="trapAgain" type="button">Try again</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= TAB 6: REFERENCES ================= -->
+<main class="page" data-page="references" hidden>
+  <section class="page-banner">
+    <div class="wrap">
+      <div class="note">Sites: Header type "Banner"</div>
+      <p class="eyebrow">Tab 6 · References</p>
+      <h1>Where Our <em>Facts</em> Come From</h1>
+      <p class="sub">Every number on this site can be traced to a source. Here are ours.</p>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="note">Sites: 3-column layout · one text box per tab</div>
+      <p class="eyebrow">Source map</p>
+      <h2 class="sec-title">Which sources support which tab</h2>
+      <div class="map">
+        <div class="card"><h3>Tab 2 · Phishing</h3><div class="chips"><a href="#ref1">[1]</a><a href="#ref2">[2]</a><a href="#ref3">[3]</a><a href="#ref4">[4]</a><a href="#ref5">[5]</a></div><p>Cybersecurity explainers, a teen health guide, UK survey research and a UAE government warning.</p></div>
+        <div class="card"><h3>Tab 3 · Fake Online Shops</h3><div class="chips"><a href="#ref6">[6]</a><a href="#ref7">[7]</a><a href="#ref8">[8]</a><a href="#ref9">[9]</a><a href="#ref10">[10]</a></div><p>FTC consumer advice and FTC data on social media scams.</p></div>
+        <div class="card"><h3>Tab 4 · Impersonation and AI</h3><div class="chips"><a href="#ref11">[11]</a><a href="#ref12">[12]</a><a href="#ref13">[13]</a></div><p>FTC consumer advice and data, and an FBI public service announcement.</p></div>
+      </div>
+
+      <div class="ieee">
+        <div class="note">Sites: one text box · paste with italics kept · each URL linked</div>
+        <p class="eyebrow">Full reference list (IEEE)</p>
+        <ol>
+          <li id="ref1"><span class="k">[1]</span><span>Fortinet, “What is phishing?” <i>Fortinet</i>. [Online]. Available: <a href="https://www.fortinet.com/resources/cyberglossary/phishing" target="_blank" rel="noopener">https://www.fortinet.com/resources/cyberglossary/phishing</a> [accessed 6 Oct. 2026].</span></li>
+          <li id="ref2"><span class="k">[2]</span><span>Nemours KidsHealth, “Internet safety,” <i>Nemours KidsHealth</i>, May 2026. [Online]. Available: <a href="https://kidshealth.org/en/teens/internet-safety.html" target="_blank" rel="noopener">https://kidshealth.org/en/teens/internet-safety.html</a> [accessed 6 Oct. 2026].</span></li>
+          <li id="ref3"><span class="k">[3]</span><span>UK Safer Internet Centre, “Too good to be true? Protecting yourself and others from scams online,” 2025. [Online]. Available: <a href="https://saferinternet.org.uk/safer-internet-day/safer-internet-day-2025/research" target="_blank" rel="noopener">https://saferinternet.org.uk/safer-internet-day/safer-internet-day-2025/research</a> [accessed 6 Oct. 2026].</span></li>
+          <li id="ref4"><span class="k">[4]</span><span>Microsoft, “What is phishing?” <i>Microsoft Security</i>. [Online]. Available: <a href="https://www.microsoft.com/en-us/security/business/security-101/what-is-phishing" target="_blank" rel="noopener">https://www.microsoft.com/en-us/security/business/security-101/what-is-phishing</a> [accessed 10 Oct. 2026].</span></li>
+          <li id="ref5"><span class="k">[5]</span><span>A. Al Hammadi, “UAE Cybersecurity Council warns public against rising phishing scams,” <i>Gulf News</i>, 20 Jan. 2026. [Online]. Available: <a href="https://gulfnews.com/uae/uae-cybersecurity-council-warns-public-against-rising-phishing-scams-1.500414274" target="_blank" rel="noopener">https://gulfnews.com/uae/uae-cybersecurity-council-warns-public-against-rising-phishing-scams-1.500414274</a> [accessed 12 Oct. 2026].</span></li>
+          <li id="ref6"><span class="k">[6]</span><span>G. de las Heras, “Don’t let scammers get in the way of your holiday shopping,” <i>FTC Consumer Advice</i>, 25 Nov. 2024. [Online]. Available: <a href="https://consumer.ftc.gov/consumer-alerts/2024/11/dont-let-scammers-get-way-your-holiday-shopping" target="_blank" rel="noopener">https://consumer.ftc.gov/consumer-alerts/2024/11/dont-let-scammers-get-way-your-holiday-shopping</a> [Accessed: Oct. 9, 2026].</span></li>
+          <li id="ref7"><span class="k">[7]</span><span>E. Fletcher, “Social media: A golden goose for scammers,” <i>FTC Data Spotlight</i>, 6 Oct. 2023. [Online]. Available: <a href="https://www.ftc.gov/news-events/data-visualizations/data-spotlight/2023/10/social-media-golden-goose-scammers" target="_blank" rel="noopener">https://www.ftc.gov/news-events/data-visualizations/data-spotlight/2023/10/social-media-golden-goose-scammers</a> [Accessed: Oct. 10, 2026].</span></li>
+          <li id="ref8"><span class="k">[8]</span><span>T. Miller, “Slow your scroll: Spot and avoid social media giveaway scams,” <i>FTC Consumer Advice</i>, 15 Nov. 2023. [Online]. Available: <a href="https://consumer.ftc.gov/consumer-alerts/2023/11/slow-your-scroll-spot-avoid-social-media-giveaway-scams" target="_blank" rel="noopener">https://consumer.ftc.gov/consumer-alerts/2023/11/slow-your-scroll-spot-avoid-social-media-giveaway-scams</a> [Accessed: Oct. 11, 2026].</span></li>
+          <li id="ref9"><span class="k">[9]</span><span>Federal Trade Commission, “Buying from an online marketplace,” <i>FTC Consumer Advice</i>, Nov. 2024. [Online]. Available: <a href="https://consumer.ftc.gov/articles/buying-online-marketplace" target="_blank" rel="noopener">https://consumer.ftc.gov/articles/buying-online-marketplace</a> [Accessed: Oct. 11, 2026].</span></li>
+          <li id="ref10"><span class="k">[10]</span><span>BCP Staff, “That social media ad with super low prices on well-known brands could be a scam,” <i>FTC Consumer Advice,</i> 26 Aug. 2025. [Online]. Available: <a href="https://consumer.ftc.gov/consumer-alerts/2025/08/social-media-ad-super-low-prices-well-known-brands-could-be-scam" target="_blank" rel="noopener">https://consumer.ftc.gov/consumer-alerts/2025/08/social-media-ad-super-low-prices-well-known-brands-could-be-scam</a> [Accessed: Oct. 12, 2026].</span></li>
+          <li id="ref11"><span class="k">[11]</span><span>A. Puig, “<i>Fighting Back Against Harmful Voice Cloning,” FTC Consumer Advice</i>, 8 Apr. 2024. [Online]. Available: <a href="https://consumer.ftc.gov/consumer-alerts/2024/04/fighting-back-against-harmful-voice-cloning" target="_blank" rel="noopener">https://consumer.ftc.gov/consumer-alerts/2024/04/fighting-back-against-harmful-voice-cloning</a> [Accessed: Oct. 13, 2026].</span></li>
+          <li id="ref12"><span class="k">[12]</span><span>Federal Trade Commission, <i>“FTC Data Show People Reported Losing $3.5 Billion to Imposter Scams in 2025,” FTC News</i>, 2026. [Online]. Available: <a href="https://www.ftc.gov/news-events/news/press-releases/2026/06/ftc-data-show-people-reported-losing-3-point-5-billion-imposter-scams-2025" target="_blank" rel="noopener">https://www.ftc.gov/news-events/news/press-releases/2026/06/ftc-data-show-people-reported-losing-3-point-5-billion-imposter-scams-2025</a> [Accessed: Oct. 13, 2026].</span></li>
+          <li id="ref13"><span class="k">[13]</span><span>Federal Bureau of Investigation, “<i>FBI Warns of Scammers Impersonating the IC3,” Internet Crime Complaint Center</i>. [Online]. Available: <a href="https://www.ic3.gov/PSA/2026/PSA260720" target="_blank" rel="noopener">https://www.ic3.gov/PSA/2026/PSA260720</a> [Accessed: Oct. 13, 2026].</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grey">
+    <div class="wrap">
+      <p class="eyebrow">How we checked our facts</p>
+      <h2 class="sec-title">Three rules we followed</h2>
+      <div class="checks">
+        <div class="card"><h3>Every number is labelled</h3><p>Each statistic shows its year, country and who it describes. UK figures come from a survey of 8–17 year-olds; US figures come from reports to the Federal Trade Commission.</p></div>
+        <div class="card"><h3>General vs. specific</h3><p>We separate data about scams in general from data about one type of scam. For example, the $3.5 billion figure covers all impersonation scams, not only AI ones.</p></div>
+        <div class="card"><h3>Made-up examples</h3><p>All brands and names in our examples (Pixora, StepUp Kicks, Glow Studio, Cousin Sara) are invented, so no real company or person is copied.</p></div>
+      </div>
+      <div class="figs">
+        <p class="eyebrow" style="margin-top:28px">Figure credits</p>
+        <p><b>Fig. 1.</b> Example of a phishing text message from a fictional brand. Based on [1], [4].</p>
+        <p><b>Fig. 2.</b> Example of a fake social media shopping ad from a fictional brand. Based on [6], [10].</p>
+        <p><b>Fig. 3.</b> Example of an impersonation call using a fictional relative's cloned voice. Based on [11].</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap"><span>Fact or Fake · a research-based website for teenagers</span><span>Preview of the Google Sites build</span></div>
+</footer>
+
+<script>
+(function(){
+  var pages = ['home','phishing','shops','impersonation','activities','references'];
+  var anchorsByPage = {test:'home', explore:'home', trap:'phishing', damage:'phishing', fix:'phishing',
+    bait:'shops', 'shop-damage':'shops', 'shop-fix':'shops', 'ai-trick':'impersonation', 'ai-damage':'impersonation', 'ai-fix':'impersonation'};
+  [1,2,3,4,5,6,7,8,9,10,11,12,13].forEach(function(r){ anchorsByPage['ref'+r] = 'references'; });
+  function show(){
+    var h = (location.hash || '#home').slice(1);
+    var page = pages.indexOf(h) >= 0 ? h : (anchorsByPage[h] || 'home');
+    document.querySelectorAll('.page').forEach(function(p){ p.hidden = p.getAttribute('data-page') !== page; });
+    document.querySelectorAll('[data-link]').forEach(function(a){
+      if (a.getAttribute('data-link') === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    if (pages.indexOf(h) >= 0) window.scrollTo(0,0);
+    else { var el = document.getElementById(h); if (el) el.scrollIntoView(); }
+  }
+  window.addEventListener('hashchange', show);
+  show();
+
+  var nt = document.getElementById('notesToggle');
+  function setNotes(on){
+    document.body.classList.toggle('show-notes', on);
+    nt.setAttribute('aria-pressed', on ? 'true' : 'false');
+    nt.textContent = on ? 'Hide Google Sites notes' : 'Show Google Sites notes';
+    try{ localStorage.setItem('fof-notes', on ? '1' : '0'); }catch(e){}
+  }
+  var saved = null; try{ saved = localStorage.getItem('fof-notes'); }catch(e){}
+  setNotes(saved === '1');
+  nt.addEventListener('click', function(){ setNotes(!document.body.classList.contains('show-notes')); });
+
+  var people = document.getElementById('people');
+  for (var i=0;i<9;i++){
+    var c = i===8 ? '#F59E5B' : 'rgba(255,255,255,.28)';
+    people.insertAdjacentHTML('beforeend','<svg class="person" viewBox="0 0 26 34"><circle cx="13" cy="8" r="6" fill="'+c+'"/><path d="M2 34c0-8 5-13 11-13s11 5 11 13Z" fill="'+c+'"/></svg>');
+  }
+
+  var out = document.getElementById('xrayOut');
+  document.querySelectorAll('.xbtn').forEach(function(b){
+    function reveal(){
+      var safe = b.getAttribute('data-safe') === '1';
+      out.querySelector('.addr').textContent = b.getAttribute('data-addr');
+      var v = out.querySelector('.verdict');
+      v.className = 'verdict ' + (safe ? 'ok' : 'bad');
+      v.textContent = safe ? 'Matches the real Pixora address.' : 'Fake: a zero instead of an "o", on a different address.';
+    }
+    b.addEventListener('mouseenter', reveal);
+    b.addEventListener('focus', reveal);
+    b.addEventListener('click', reveal);
+  });
+
+  // Deal detector
+  var boxes = document.querySelectorAll('#detector input');
+  var fill = document.getElementById('ddFill'), ddText = document.getElementById('ddText');
+  function updateDetector(){
+    var n = 0; boxes.forEach(function(b){ if (b.checked) n++; });
+    fill.style.width = (n/boxes.length*100) + '%';
+    if (n === 0){ fill.style.background = 'var(--green-bright)'; ddText.textContent = 'No warning signs ticked yet. Still research the seller before you buy.'; }
+    else if (n <= 2){ fill.style.background = 'var(--orange-soft)'; ddText.textContent = n + ' warning sign' + (n>1?'s':'') + '. Slow down and check the seller before you pay.'; }
+    else { fill.style.background = '#F87171'; ddText.textContent = n + ' warning signs. Walk away: this looks like a fake shop.'; }
+  }
+  boxes.forEach(function(b){ b.addEventListener('change', updateDetector); });
+
+  // Quiz
+  var answered = {}, correct = 0, fbs = [];
+  document.querySelectorAll('.round').forEach(function(r){
+    var fb = r.querySelector('.feedback'); fb.hidden = true; fbs.push(fb);
+    r.querySelectorAll('.choice').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = r.getAttribute('data-round');
+        if (answered[id]) return;
+        answered[id] = true;
+        var ok = btn.getAttribute('data-ok') === '1';
+        if (ok) correct++;
+        r.querySelectorAll('.choice').forEach(function(x){ x.disabled = true; if (x.getAttribute('data-ok') === '1') x.classList.add('right'); });
+        if (!ok) btn.classList.add('wrong');
+        fb.hidden = false;
+        updateScore();
+      });
+    });
+  });
+  function updateScore(){
+    var n = Object.keys(answered).length;
+    document.getElementById('scoreNum').textContent = correct + '/3';
+    var badge = document.getElementById('scoreBadge');
+    if (n < 3) badge.textContent = 'Answer all three rounds to get your badge.';
+    else if (correct === 3) badge.textContent = 'Scam Spotter! You beat every trap.';
+    else if (correct === 2) badge.textContent = 'Almost there. One trap got you.';
+    else badge.textContent = 'Read the tabs again, then try once more!';
+  }
+  document.getElementById('resetQuiz').addEventListener('click', function(){
+    answered = {}; correct = 0;
+    document.querySelectorAll('.choice').forEach(function(x){ x.disabled = false; x.classList.remove('right','wrong'); });
+    fbs.forEach(function(f){ f.hidden = true; });
+    updateScore();
+  });
+
+  var front = document.getElementById('trapFront'), back = document.getElementById('trapBack');
+  document.getElementById('trapGo').addEventListener('click', function(){ front.hidden = true; back.hidden = false; });
+  document.getElementById('trapAgain').addEventListener('click', function(){ back.hidden = true; front.hidden = false; });
+})();
+</script>
+
+</body>
+</html>
